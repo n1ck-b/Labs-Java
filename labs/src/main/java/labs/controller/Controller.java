@@ -10,9 +10,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/products")
 public class Controller {
-    @Autowired
     private ProductService productService;
 
+    @Autowired
+    public Controller(ProductService productService) {
+        this.productService = productService;
+    }
+    
     @GetMapping("/{productName}")
     public Product getMacronutrientsByProductName(@PathVariable String productName) throws IOException {
         return productService.getProductByName(productName);
