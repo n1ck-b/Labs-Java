@@ -20,8 +20,7 @@ public class ProductServiceImpl implements ProductService {
         Response responseFromExternalApi = client.newCall(requestForExternalApi).execute();
         ObjectMapper mapper = new ObjectMapper();
         JsonNode treeRoot = mapper.readTree(responseFromExternalApi.body().string());
-        Product product = mapper.treeToValue(treeRoot.get("items").get(0), Product.class);
-        return product;
+        return mapper.treeToValue(treeRoot.get("items").get(0), Product.class);
     }
 
     @Override
@@ -31,7 +30,6 @@ public class ProductServiceImpl implements ProductService {
         Response responseFromExternalApi = client.newCall(requestForExternalApi).execute();
         ObjectMapper mapper = new ObjectMapper();
         JsonNode node = mapper.readTree(responseFromExternalApi.body().string());
-        List<Product> products = mapper.treeToValue(node.get("items"), new TypeReference<List<Product>>() {});
-        return products;
+        return mapper.treeToValue(node.get("items"), new TypeReference<List<Product>>() {});
     }
 }
