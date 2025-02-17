@@ -13,9 +13,6 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-  <properties>
-    <sonar.sources>src/main/java,src/main/webapp</sonar.sources>
- </properties>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
