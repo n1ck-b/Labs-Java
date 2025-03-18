@@ -20,4 +20,8 @@ public interface MealDao {
     List<Meal> getAllMeals();
 
     ResponseEntity<String> deleteMealById(int id);
+
+    int deleteProductByIdIfNotUsed(int id);
+
+    void deleteProductsIfNotUsed(int mealId);
 }

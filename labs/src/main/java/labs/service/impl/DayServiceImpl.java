@@ -64,7 +64,12 @@ public class DayServiceImpl implements DayService {
         if (day == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        JsonNode node = json.apply(objectMapper.convertValue(day, JsonNode.class));
+        JsonNode node;
+        try {
+            node = json.apply(objectMapper.convertValue(day, JsonNode.class));
+        } catch (JsonPatchException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
         day = objectMapper.treeToValue(node, Day.class);
         if (id != day.getId()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);

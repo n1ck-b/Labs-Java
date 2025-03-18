@@ -99,6 +99,7 @@ public class MealDaoImpl implements MealDao {
         return ResponseEntity.ok("Deleted successfully");
     }
 
+    @Override
     @Transactional
     public int deleteProductByIdIfNotUsed(int id) {
         if (entityManager.createNativeQuery("SELECT meal_id FROM meal_product WHERE product_id = :id")
@@ -106,18 +107,21 @@ public class MealDaoImpl implements MealDao {
             entityManager.createQuery("DELETE FROM Product WHERE id = :id")
                     .setParameter("id", id)
                     .executeUpdate();
+            return id;
         }
-        return id;
+        return 0;
     }
 
+    @Override
     @Transactional
     public void deleteProductsIfNotUsed(int mealId) {
         List<?> results = entityManager
                 .createNativeQuery("SELECT product_id FROM meal_product WHERE meal_id = :mealId")
-                .setParameter("mealId", mealId).getResultList();
-        if (results.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+                .setParameter("mealId", mealId)
+                .getResultList();
+//        if (results.isEmpty()) {
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+//        }
         List<Integer> productIds = results.stream().map(x -> ((Number) x).intValue()).toList();
         productIds.stream().forEach(this::deleteProductByIdIfNotUsed);
     }

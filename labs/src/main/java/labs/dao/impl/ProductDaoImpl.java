@@ -85,9 +85,18 @@ public class ProductDaoImpl implements ProductDao {
         return ResponseEntity.ok("Deleted successfully");
     }
 
+    public void deleteProductIfNotUsedOrDeleteFromMeal(int mealId, int productId) {
+        if (mealDao.deleteProductByIdIfNotUsed(productId) == 0) {
+            entityManager.createNativeQuery("DELETE FROM meal_product " +
+                            "WHERE meal_id = :mealId AND product_id = :productId")
+                    .setParameter("mealId", mealId)
+                    .setParameter("productId", productId)
+                    .executeUpdate();
+        }
+    }
+
     @Override
     @Transactional
-    // СДЕЛАТЬ ТАК, ЧТО ЕСЛИ ЭТИ ПРОДУКТЫ ЕЩЕ ГДЕ-ТО ЕСТЬ, ТО НЕ УДАЛЯТЬ ИХ
     public ResponseEntity<String> deleteProductsByMealId(int mealId) {
         List<?> results = entityManager
                 .createNativeQuery("SELECT product_id FROM meal_product WHERE meal_id = :mealId")
@@ -97,8 +106,7 @@ public class ProductDaoImpl implements ProductDao {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         List<Integer> productIds = results.stream().map(x -> ((Number) x).intValue()).toList();
-        productIds.stream().forEach(id -> entityManager.createQuery("DELETE FROM Product WHERE id = :id")
-                .setParameter("id", id).executeUpdate());
+        productIds.stream().forEach(id -> deleteProductIfNotUsedOrDeleteFromMeal(mealId, id));
         return ResponseEntity.ok("Deleted successfully");
     }
 

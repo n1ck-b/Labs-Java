@@ -105,7 +105,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ResponseEntity<ProductDto> updateProductById(int id, JsonPatch json)
-            throws JsonPatchException, JsonProcessingException {
+            throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         Product product = productDao.getProductById(id);
@@ -115,7 +115,12 @@ public class ProductServiceImpl implements ProductService {
         if (json.toString().contains("id") | json.toString().contains("meals")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-        JsonNode node = json.apply(objectMapper.convertValue(product, JsonNode.class));
+        JsonNode node;
+        try {
+            node = json.apply(objectMapper.convertValue(product, JsonNode.class));
+        } catch (JsonPatchException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
         product = objectMapper.treeToValue(node, Product.class);
         Product updatedProduct = productDao.updateProduct(id, product);
         return ResponseEntity.ok(ProductDto.toDto(updatedProduct));

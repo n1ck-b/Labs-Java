@@ -52,8 +52,7 @@ public class MealServiceImpl implements MealService {
     }
 
     @Override
-    public ResponseEntity<MealDto> updateMealById(JsonPatch json, int id) throws
-            JsonPatchException, JsonProcessingException {
+    public ResponseEntity<MealDto> updateMealById(JsonPatch json, int id) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         Meal meal = mealDao.getMealById(id);
@@ -64,8 +63,13 @@ public class MealServiceImpl implements MealService {
                 json.toString().contains("products")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
+        JsonNode node;
+        try {
+            node = json.apply(objectMapper.convertValue(meal, JsonNode.class));
+        } catch (JsonPatchException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
         Day day = meal.getDay();
-        JsonNode node = json.apply(objectMapper.convertValue(meal, JsonNode.class));
         meal = objectMapper.treeToValue(node, Meal.class);
         if (id != meal.getId()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
