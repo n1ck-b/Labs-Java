@@ -112,7 +112,7 @@ public class ProductServiceImpl implements ProductService {
         if (product == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        if (json.toString().contains("id") | json.toString().contains("meals")) {
+        if (json.toString().contains("id") || json.toString().contains("meals")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         JsonNode node;
