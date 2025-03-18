@@ -119,9 +119,6 @@ public class MealDaoImpl implements MealDao {
                 .createNativeQuery("SELECT product_id FROM meal_product WHERE meal_id = :mealId")
                 .setParameter("mealId", mealId)
                 .getResultList();
-//        if (results.isEmpty()) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-//        }
         List<Integer> productIds = results.stream().map(x -> ((Number) x).intValue()).toList();
         productIds.stream().forEach(this::deleteProductByIdIfNotUsed);
     }
