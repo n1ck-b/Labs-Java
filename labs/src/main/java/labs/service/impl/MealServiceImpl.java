@@ -59,7 +59,7 @@ public class MealServiceImpl implements MealService {
         if (meal == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        if (json.toString().contains("day") | json.toString().contains("id") |
+        if (json.toString().contains("day") || json.toString().contains("id") ||
                 json.toString().contains("products")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
