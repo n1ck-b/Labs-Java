@@ -18,6 +18,7 @@ public class MealDaoImpl implements MealDao {
     @PersistenceContext
     EntityManager entityManager;
 
+    private static final String deletedMessage = "Deleted successfully";
     private final DayDao dayDao;
 
     @Autowired
@@ -59,7 +60,7 @@ public class MealDaoImpl implements MealDao {
                 .executeUpdate() == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        return ResponseEntity.ok("Deleted successfully");
+        return ResponseEntity.ok(deletedMessage);
     }
 
     @Override
@@ -70,7 +71,7 @@ public class MealDaoImpl implements MealDao {
                         .setParameter("dayId", dayId).setParameter("mealId", mealId).executeUpdate() == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        return ResponseEntity.ok("Deleted successfully");
+        return ResponseEntity.ok(deletedMessage);
     }
 
     @Override
@@ -96,7 +97,7 @@ public class MealDaoImpl implements MealDao {
                 .executeUpdate() == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        return ResponseEntity.ok("Deleted successfully");
+        return ResponseEntity.ok(deletedMessage);
     }
 
     @Override
