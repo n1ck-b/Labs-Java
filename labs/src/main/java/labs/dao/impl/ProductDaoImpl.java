@@ -64,8 +64,8 @@ public class ProductDaoImpl implements ProductDao {
     @Override
     public List<Product> getAllProductsByMealId(int mealId) {
         List<?> results = entityManager
-                .createNativeQuery("SELECT product_id FROM meal_product WHERE meal_id = :mealId")
-                .setParameter("mealId", mealId)
+                .createNativeQuery("SELECT product_id FROM meal_product WHERE meal_id = :id")
+                .setParameter("id", mealId)
                 .getResultList();
         List<Integer> productIds = results.stream().map(x -> ((Number) x).intValue()).toList();
         return productIds.stream().map(id -> entityManager.find(Product.class, id)).toList();
@@ -99,8 +99,8 @@ public class ProductDaoImpl implements ProductDao {
     @Transactional
     public ResponseEntity<String> deleteProductsByMealId(int mealId) {
         List<?> results = entityManager
-                .createNativeQuery("SELECT product_id FROM meal_product WHERE meal_id = :mealId")
-                .setParameter("mealId", mealId)
+                .createNativeQuery("SELECT product_id FROM meal_product WHERE meal_id = :id")
+                .setParameter("id", mealId)
                 .getResultList();
         if (results.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
