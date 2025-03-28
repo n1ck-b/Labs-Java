@@ -1,13 +1,13 @@
 package labs.dao;
 
 import java.util.List;
-import labs.Product;
+import labs.model.Product;
 import org.springframework.http.ResponseEntity;
 
 public interface ProductDao {
     Product getProductById(int id);
 
-    int addProduct(int mealId, Product product);
+    int addProductByMealId(int mealId, Product product);
 
     List<Product> getAllProductsByMealId(int mealId);
 
@@ -18,4 +18,14 @@ public interface ProductDao {
     ResponseEntity<String> deleteProductById(int id);
 
     Product updateProduct(int id, Product updatedProduct);
+
+    int deleteProductByIdIfNotUsed(int id);
+
+    void deleteProductsIfNotUsed(int mealId);
+
+    //int addProduct(Product product);
+
+    float getProductWeightFromTable(int mealId, int productId);
+
+    void saveProductWeightToMealProductTable(float weight, int mealId, int productId);
 }

@@ -5,8 +5,8 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import java.io.IOException;
 import java.util.List;
-import labs.Product;
 import labs.dto.ProductDto;
+import labs.model.Product;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +14,11 @@ import org.springframework.stereotype.Service;
 public interface ProductService {
     ProductDto getProductById(int id) throws IOException;
 
-    List<Product> getProductByQuery(String query) throws IOException;
+    List<Product> getProductsByQuery(String query) throws IOException;
 
-    List<Integer> addProduct(int mealId, ProductDto productDto);
+    List<Integer> addProductByMealId(int mealId, ProductDto productDto);
 
-    List<Integer> addProductsByQuery(int mealId, String query) throws IOException;
+    List<Integer> addProductsByQueryAndMealId(int mealId, String query) throws IOException;
 
     List<ProductDto> getAllProductsByMealId(int mealId);
 
@@ -30,4 +30,6 @@ public interface ProductService {
 
     ResponseEntity<ProductDto> updateProductById(int id, JsonPatch json)
             throws JsonPatchException, JsonProcessingException;
+
+    //int addProduct(ProductDto productDto);
 }

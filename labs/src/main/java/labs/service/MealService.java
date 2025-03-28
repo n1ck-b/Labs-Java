@@ -14,7 +14,7 @@ public interface MealService {
 
     ResponseEntity<String> deleteMealsByDayId(int dayId);
 
-    ResponseEntity<String> deleteMealsByDayIdAndMealId(int dayId, int mealId);
+    ResponseEntity<String> deleteMealByDayIdAndMealId(int dayId, int mealId);
 
     ResponseEntity<MealDto> updateMealById(JsonPatch json, int id) throws
             JsonPatchException, JsonProcessingException;
@@ -24,4 +24,6 @@ public interface MealService {
     MealDto getMealById(int id);
 
     ResponseEntity<String> deleteMealById(int id);
+
+    List<MealDto> getMealsByProductName(String productName);
 }

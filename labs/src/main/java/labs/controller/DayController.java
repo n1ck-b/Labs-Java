@@ -87,6 +87,6 @@ public class DayController {
         if (mealId == null) {
             return mealService.deleteMealsByDayId(dayId);
         }
-        return mealService.deleteMealsByDayIdAndMealId(dayId, mealId);
+        return mealService.deleteMealByDayIdAndMealId(dayId, mealId);
     }
 }

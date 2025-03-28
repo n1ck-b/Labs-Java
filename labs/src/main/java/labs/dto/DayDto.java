@@ -3,10 +3,13 @@ package labs.dto;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
-import labs.Day;
+import labs.model.Day;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 public class DayDto {
     private int id;
     private LocalDate date;

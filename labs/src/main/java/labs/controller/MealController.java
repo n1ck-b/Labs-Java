@@ -40,8 +40,11 @@ public class MealController {
     }
 
     @GetMapping
-    public List<MealDto> getAllMeals() {
-        return mealService.getAllMeals();
+    public List<MealDto> getMeals(@RequestParam(name = "product-name", required = false) String productName) {
+        if (productName == null) {
+            return mealService.getAllMeals();
+        }
+        return mealService.getMealsByProductName(productName);
     }
 
     @GetMapping("/{id}")
@@ -59,9 +62,9 @@ public class MealController {
                                   @RequestBody(required = false) ProductDto productDto,
                                   @PathVariable int mealId) throws IOException {
         if (query == null) {
-            return productService.addProduct(mealId, productDto);
+            return productService.addProductByMealId(mealId, productDto);
         }
-        return productService.addProductsByQuery(mealId, query);
+        return productService.addProductsByQueryAndMealId(mealId, query);
     }
 
     @GetMapping("/{mealId}/products")
@@ -73,4 +76,9 @@ public class MealController {
     public ResponseEntity<String> deleteProductsByMealId(@PathVariable int mealId) {
         return productService.deleteProductsByMealId(mealId);
     }
+
+//    @GetMapping
+//    public List<MealDto> getMealsByProductName(@RequestParam(name = "product-name") String productName) {
+//        return mealService.getMealsByProductName(productName);
+//    }
 }

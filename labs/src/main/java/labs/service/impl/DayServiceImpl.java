@@ -8,9 +8,9 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import java.time.LocalDate;
 import java.util.List;
-import labs.Day;
 import labs.dao.DayDao;
 import labs.dto.DayDto;
+import labs.model.Day;
 import labs.service.DayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,9 +30,9 @@ public class DayServiceImpl implements DayService {
     @Override
     public DayDto getDayById(int id) {
         Day day = dayDao.getDayById(id);
-        if (day == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+//        if (day == null) {
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+//        }
         return DayDto.toDto(day);
     }
 
@@ -54,16 +54,16 @@ public class DayServiceImpl implements DayService {
 
     @Override
     public ResponseEntity<DayDto> updateDayById(int id, JsonPatch json)
-            throws JsonPatchException, JsonProcessingException {
+            throws JsonProcessingException {
         if (json.toString().contains("id") | json.toString().contains("meals")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         Day day = dayDao.getDayById(id);
-        if (day == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+//        if (day == null) {
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+//        }
         JsonNode node;
         try {
             node = json.apply(objectMapper.convertValue(day, JsonNode.class));
@@ -71,9 +71,9 @@ public class DayServiceImpl implements DayService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         day = objectMapper.treeToValue(node, Day.class);
-        if (id != day.getId()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
+//        if (id != day.getId()) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+//        }
         Day updatedDay = dayDao.updateDayById(id, day);
         return ResponseEntity.ok(DayDto.toDto(updatedDay));
     }

@@ -1,7 +1,10 @@
 package labs.dao;
 
 import java.util.List;
-import labs.Meal;
+
+import labs.dto.MealDto;
+import labs.model.Meal;
+import labs.model.Product;
 import org.springframework.http.ResponseEntity;
 
 public interface MealDao {
@@ -21,7 +24,13 @@ public interface MealDao {
 
     ResponseEntity<String> deleteMealById(int id);
 
-    int deleteProductByIdIfNotUsed(int id);
+    Product setRealWeightAndCaloriesForProduct(int mealId, Product product);
 
-    void deleteProductsIfNotUsed(int mealId);
+    Meal setRealWeightAndCaloriesForAllProducts(Meal meal);
+
+    Meal setWeightAndCaloriesForAllProducts(Meal meal);
+
+    Product setWeightAndCaloriesForProduct(Product product);
+
+    List<Meal> getMealsByProductName(String productName);
 }

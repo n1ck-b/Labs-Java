@@ -1,10 +1,13 @@
 package labs.dto;
 
 import java.util.List;
-import labs.Meal;
+import labs.model.Meal;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 public class MealDto {
     private int id;
     private String mealType;

@@ -5,8 +5,8 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import java.time.LocalDate;
 import java.util.List;
-import labs.Day;
 import labs.dto.DayDto;
+import labs.model.Day;
 import org.springframework.http.ResponseEntity;
 
 public interface DayService {

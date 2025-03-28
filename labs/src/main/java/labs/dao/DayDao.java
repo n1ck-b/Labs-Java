@@ -2,7 +2,7 @@ package labs.dao;
 
 import java.time.LocalDate;
 import java.util.List;
-import labs.Day;
+import labs.model.Day;
 import org.springframework.http.ResponseEntity;
 
 public interface DayDao {

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,7 +38,7 @@ public class ProductController {
     public List<ProductDto> getProduct(@RequestParam(name = "query", required = false) String query)
             throws IOException {
         if (query != null) {
-            return productService.getProductByQuery(query).stream().map(ProductDto::toDto).toList();
+            return productService.getProductsByQuery(query).stream().map(ProductDto::toDto).toList();
         }
         return productService.getAllProducts();
     }
@@ -52,4 +53,9 @@ public class ProductController {
             throws JsonPatchException, JsonProcessingException {
         return productService.updateProductById(id, json);
     }
+
+//    @PostMapping
+//    public int addProduct(@RequestBody ProductDto productDto) {
+//
+//    }
 }
