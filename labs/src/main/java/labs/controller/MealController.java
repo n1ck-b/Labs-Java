@@ -76,9 +76,4 @@ public class MealController {
     public ResponseEntity<String> deleteProductsByMealId(@PathVariable int mealId) {
         return productService.deleteProductsByMealId(mealId);
     }
-
-//    @GetMapping
-//    public List<MealDto> getMealsByProductName(@RequestParam(name = "product-name") String productName) {
-//        return mealService.getMealsByProductName(productName);
-//    }
 }

@@ -16,10 +16,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import java.util.List;
-import java.util.Objects;
-
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -76,11 +73,6 @@ public class Product {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Product product = (Product) o;
-//        return id == product.id && Float.compare(weight, product.weight) == 0 && Float.compare(calories, product.calories) == 0 && Float.compare(proteins, product.proteins) == 0 && Float.compare(carbs, product.carbs) == 0 && Float.compare(fats, product.fats) == 0 && Objects.equals(name, product.name) && Objects.equals(meals, product.meals);
-        return id == product.id;
+        return id == product.id && Float.compare(weight, product.weight) == 0;
     }
-
-//    public int sizeInBytes() {
-//        return Integer.SIZE / 8 + name.length() * 2 + (Float.SIZE / 8) * 5 + meals.stream().mapToInt(Meal::sizeInBytes).sum();
-//    }
 }

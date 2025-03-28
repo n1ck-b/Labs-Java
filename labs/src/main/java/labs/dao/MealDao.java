@@ -1,8 +1,6 @@
 package labs.dao;
 
 import java.util.List;
-
-import labs.dto.MealDto;
 import labs.model.Meal;
 import labs.model.Product;
 import org.springframework.http.ResponseEntity;
@@ -33,4 +31,6 @@ public interface MealDao {
     Product setWeightAndCaloriesForProduct(Product product);
 
     List<Meal> getMealsByProductName(String productName);
+
+    void updateDayInCache(int dayId);
 }

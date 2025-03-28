@@ -53,17 +53,6 @@ public class Meal {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Meal meal = (Meal) o;
-//        return id == product.id && Float.compare(weight, product.weight) == 0 && Float.compare(calories, product.calories) == 0 && Float.compare(proteins, product.proteins) == 0 && Float.compare(carbs, product.carbs) == 0 && Float.compare(fats, product.fats) == 0 && Objects.equals(name, product.name) && Objects.equals(meals, product.meals);
         return id == meal.id;
     }
-
-//    public int sizeInBytes() {
-//        if (StackWalker.getInstance()
-//                .walk(frames -> frames
-//                        .filter(f -> f.getClassName().equals("Meal") &&
-//                                f.getMethodName().equals("sizeInBytes")).count()) == 1) {
-//            return Integer.SIZE / 8 + mealType.length() * 2 + day.sizeInBytes() + products.stream().mapToInt(Product::sizeInBytes).sum();
-//        }
-//        return 0;
-//    }
 }

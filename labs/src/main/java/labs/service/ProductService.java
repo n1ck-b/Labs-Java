@@ -30,6 +30,4 @@ public interface ProductService {
 
     ResponseEntity<ProductDto> updateProductById(int id, JsonPatch json)
             throws JsonPatchException, JsonProcessingException;
-
-    //int addProduct(ProductDto productDto);
 }

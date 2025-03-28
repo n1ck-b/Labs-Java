@@ -53,9 +53,4 @@ public class ProductController {
             throws JsonPatchException, JsonProcessingException {
         return productService.updateProductById(id, json);
     }
-
-//    @PostMapping
-//    public int addProduct(@RequestBody ProductDto productDto) {
-//
-//    }
 }

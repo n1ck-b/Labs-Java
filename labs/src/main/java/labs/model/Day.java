@@ -35,7 +35,6 @@ public class Day {
     @Column(name = "date")
     private LocalDate date;
 
-    //@OnDelete(action = OnDeleteAction.CASCADE)
     @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "day_id")
@@ -50,11 +49,6 @@ public class Day {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Day day = (Day) o;
-//        return id == product.id && Float.compare(weight, product.weight) == 0 && Float.compare(calories, product.calories) == 0 && Float.compare(proteins, product.proteins) == 0 && Float.compare(carbs, product.carbs) == 0 && Float.compare(fats, product.fats) == 0 && Objects.equals(name, product.name) && Objects.equals(meals, product.meals);
         return id == day.id;
     }
-
-//    public int sizeInBytes() {
-//        return Integer.SIZE / 8 + 16 + meals.stream().mapToInt(Meal::sizeInBytes).sum();
-//    }
 }

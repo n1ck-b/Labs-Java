@@ -8,7 +8,6 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import labs.dao.MealDao;
 import labs.dto.MealDto;
 import labs.model.Day;
@@ -41,6 +40,8 @@ public class MealServiceImpl implements MealService {
     @Override
     public int addMeal(int dayId, MealDto meal) {
         return mealDao.addMeal(dayId, meal.fromDto());
+//        mealDao.updateDayInCache(dayId);
+//        return id;
     }
 
     @Override
@@ -58,9 +59,6 @@ public class MealServiceImpl implements MealService {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         Meal meal = mealDao.getMealById(id);
-//        if (meal == null) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-//        }
         if (json.toString().contains("day") | json.toString().contains("id") |
                 json.toString().contains("products")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -73,9 +71,6 @@ public class MealServiceImpl implements MealService {
         }
         Day day = meal.getDay();
         meal = objectMapper.treeToValue(node, Meal.class);
-//        if (id != meal.getId()) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-//        }
         meal.setDay(day);
         Meal updatedMeal = mealDao.updateMeal(id, meal);
         return ResponseEntity.ok(MealDto.toDto(updatedMeal));
@@ -93,9 +88,6 @@ public class MealServiceImpl implements MealService {
     @Override
     public MealDto getMealById(int id) {
         Meal meal = mealDao.getMealById(id);
-//        if (meal == null) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-//        }
         return MealDto.toDto(meal);
     }
 

@@ -1,12 +1,11 @@
 package labs.dao;
 
+import java.util.List;
 import labs.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer> {
@@ -17,8 +16,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     @Query(nativeQuery = true, value = "SELECT product_id FROM meal_product WHERE meal_id = :mealId")
     List<Integer> getProductsIdsByMealId(int mealId);
-
-    Product findByWeightAndName(float weight, String name);
 
     Product findByName(String name);
 

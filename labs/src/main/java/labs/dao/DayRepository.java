@@ -9,8 +9,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DayRepository extends JpaRepository<Day, Integer> {
-    List<Day> findDayByDate(LocalDate date);
-
     @Query("SELECT id FROM Day")
     List<Integer> findAllDaysIds();
 

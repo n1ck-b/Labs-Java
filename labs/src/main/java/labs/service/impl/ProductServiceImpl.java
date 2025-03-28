@@ -10,8 +10,6 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import labs.dao.Cache;
 import labs.dao.ProductDao;
 import labs.dto.ProductDto;
 import labs.model.Product;
@@ -30,20 +28,15 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class ProductServiceImpl implements ProductService {
     private final ProductDao productDao;
-    private final Cache cache;
 
     @Autowired
-    public ProductServiceImpl(ProductDao productDao, Cache cache) {
+    public ProductServiceImpl(ProductDao productDao) {
         this.productDao = productDao;
-        this.cache = cache;
     }
 
     @Override
     public ProductDto getProductById(int id) {
         Product product = productDao.getProductById(id);
-//        if (product == null) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-//        }
         return ProductDto.toDto(product);
     }
 
@@ -52,12 +45,8 @@ public class ProductServiceImpl implements ProductService {
         long startTime = System.currentTimeMillis();
         ObjectMapper mapper = new ObjectMapper();
         JsonNode node = ProductServiceImpl.getJsonFromExternalApi(query);
-        log.info("time elapsed for product by query = " + (System.currentTimeMillis() - startTime));
-        List<Product> products = mapper.treeToValue(node.get("items"), new TypeReference<List<Product>>() {});
-//        for (Product product : products) {
-//            if (!cache.exists("RealProduct"))
-//        }
-        return products;
+        log.info("Time elapsed for product by query = " + (System.currentTimeMillis() - startTime) + "ms");
+        return mapper.treeToValue(node.get("items"), new TypeReference<List<Product>>() {});
     }
 
     private static JsonNode getJsonFromExternalApi(String query) throws IOException {
@@ -66,7 +55,7 @@ public class ProductServiceImpl implements ProductService {
                 query).addHeader("X-Api-Key", "3tTSiLRQSqH+KhOWyc1zaA==TkIDRKtbqKj4Aryy").build();
         long startTime = System.currentTimeMillis();
         Response responseFromExternalApi = client.newCall(requestForExternalApi).execute();
-        log.info("time elapsed for API = " + (System.currentTimeMillis() - startTime));
+        log.info("Time elapsed for API request = " + (System.currentTimeMillis() - startTime) + "ms");
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readTree(responseFromExternalApi.body().string());
     }
@@ -108,9 +97,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductDto> getAllProductsByMealId(int mealId) {
         List<Product> products = productDao.getAllProductsByMealId(mealId);
-//        if (products.isEmpty()) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-//        }
         return products.stream().map(ProductDto::toDto).toList();
     }
 
@@ -135,10 +121,8 @@ public class ProductServiceImpl implements ProductService {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         Product product = productDao.getProductById(id);
-//        if (product == null) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-//        }
-        if (json.toString().contains("id") || json.toString().contains("meals") || json.toString().contains("weight")) {
+        if (json.toString().contains("id") || json.toString().contains("meals") ||
+                json.toString().contains("weight")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         JsonNode node;

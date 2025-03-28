@@ -23,9 +23,9 @@ public interface ProductDao {
 
     void deleteProductsIfNotUsed(int mealId);
 
-    //int addProduct(Product product);
-
     float getProductWeightFromTable(int mealId, int productId);
 
     void saveProductWeightToMealProductTable(float weight, int mealId, int productId);
+
+    void updateProductsInCache(List<Integer> mealIds);
 }
