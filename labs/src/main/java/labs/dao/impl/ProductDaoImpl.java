@@ -102,7 +102,6 @@ public class ProductDaoImpl implements ProductDao {
                     productWeight, mealId, productFromDb.getId());
             entityManager.flush();
             List<Integer> mealIds = mealRepository.getMealIdsByProductName(productFromDb.getName());
-
             for (int id : mealIds) {
                 productCopy = mealDao.setRealWeightAndCaloriesForProduct(id, productFromDb);
                 if (cache.exists("Meal" + id)) {
@@ -137,15 +136,15 @@ public class ProductDaoImpl implements ProductDao {
         productRepository.saveProductWeightToMealProductTable(productWeight, mealId, product.getId());
         entityManager.flush();
         entityManager.detach(product);
-        List<Integer> mealIds = mealRepository.getMealIdsByProductName(product.getName());
-        for (int id : mealIds) {
-            productCopy = mealDao.setRealWeightAndCaloriesForProduct(id, product);
-            if (cache.exists("Meal" + id)) {
-                log.info("Meal (id = " + id + ") was updated in cache");
-                ((Meal) cache.getObject("Meal" + id)).getProducts().remove(productCopy);
-                ((Meal) cache.getObject("Meal" + id)).getProducts().add(productCopy);
-            }
-        }
+//        List<Integer> mealIds = mealRepository.getMealIdsByProductName(product.getName());
+//        for (int id : mealIds) {
+//            productCopy = mealDao.setRealWeightAndCaloriesForProduct(id, product);
+//            if (cache.exists("Meal" + id)) {
+//                log.info("Meal (id = " + id + ") was updated in cache");
+//                ((Meal) cache.getObject("Meal" + id)).getProducts().remove(productCopy);
+//                ((Meal) cache.getObject("Meal" + id)).getProducts().add(productCopy);
+//            }
+//        }
         productCopy = mealDao.setRealWeightAndCaloriesForProduct(mealId, product);
         Day day = dayRepository.findDayByMealId(mealId);
         if (cache.exists("Day" + day.getId())) {
@@ -253,31 +252,7 @@ public class ProductDaoImpl implements ProductDao {
     @Transactional
     public int deleteProductByIdIfNotUsed(int id) {
         if (mealRepository.findMealIdsByProductId(id).size() == 1) {
-            List<Integer> mealIds = mealRepository.findMealIdsByProductId(id);
-            productRepository.deleteById(id);
-            if (cache.exists("Product" + id)) {
-                if (cache.exists("Product" + id)) {
-                    cache.removeObject("Product" + id);
-                    log.info("Product (id = " + id + ") was deleted from cache");
-                }
-            }
-            for (int mealId : mealIds) {
-                if (cache.exists("Meal" + mealId)) {
-                    Meal mealFromCache = (Meal) cache.getObject("Meal" + mealId);
-                    mealFromCache.getProducts().removeIf(product -> product.getId() == id);
-                    log.info("Product (id = " + id +
-                            ") was removed from meal (id = " + mealId + ") in cache");
-                }
-                Day day = dayRepository.findDayByMealId(mealId);
-                if (cache.exists("Day" + day.getId())) {
-                    Day dayFromCache = (Day) cache.getObject("Day" + day.getId());
-                    dayFromCache.getMeals()
-                            .forEach(meal -> meal.getProducts()
-                                    .removeIf(product -> product.getId() == id));
-                    log.info("Product (id = " + id + ") was deleted from meal (id = " +
-                            mealId + ") in day (id = " + dayFromCache.getId() + ") in cache");
-                }
-            }
+            deleteProductById(id);
             return id;
         }
         return 0;
@@ -286,6 +261,9 @@ public class ProductDaoImpl implements ProductDao {
     @Transactional
     public void deleteProductIfNotUsedOrDeleteFromMeal(int mealId, int productId) {
         if (deleteProductByIdIfNotUsed(productId) == 0) {
+            final List<Integer> mealIds = mealRepository.findMealIdsByProductId(productId);
+            productRepository.deleteProductFromMealProductTable(mealId, productId);
+            entityManager.flush();
             if (cache.exists("Product" + productId)) {
                 if (cache.exists("Product" + productId)) {
                     ((Product) cache.getObject("Product" + productId))
@@ -299,14 +277,11 @@ public class ProductDaoImpl implements ProductDao {
                 log.info("Product (id = " + productId +
                         ") was deleted from meal (id = " + mealId + ") in cache");
             }
-            List<Integer> mealIds = mealRepository.findMealIdsByProductId(productId);
-            productRepository.deleteProductFromMealProductTable(mealId, productId);
-            entityManager.flush();
             for (int id : mealIds) {
                 if (cache.exists("Meal" + id)) {
                     Meal meal = (Meal) cache.getObject("Meal" + id);
                     meal.getProducts().forEach(product -> product.getMeals()
-                                    .removeIf(mealFromList -> mealFromList.getId() == id));
+                                    .removeIf(mealFromList -> mealFromList.getId() == mealId));
                     log.info("Product (id = " + productId + ") was deleted from cache");
                 }
                 Day day = dayRepository.findDayByMealId(id);
