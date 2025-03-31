@@ -34,6 +34,10 @@ public class MealDaoImpl implements MealDao {
     private final ProductDao productDao;
     private final Cache cache;
     private final ProductRepository productRepository;
+    private static final String GETMEALLOG = "Get meal (id = %d) from %s. Time elapsed = %fms";
+    private static final String MEALLOG = "Meal (id = %d) was %s cache";
+    private static final String DELETEDMESSAGE = "Deleted successfully";
+    private static final String MEALDAYLOG = "Meal (id = %d) was %s day (id = %d) in cache";
 
     @Autowired
     public MealDaoImpl(MealRepository mealRepository, ProductDao productDao,
@@ -50,8 +54,7 @@ public class MealDaoImpl implements MealDao {
         try {
             long startTime = System.nanoTime();
             if (cache.exists("Meal" + id)) {
-                log.info("Get meal (id = " + id + ") from cache. Time elapsed = " +
-                        (System.nanoTime() - startTime) / 1000000.0 + "ms");
+                log.info(String.format(GETMEALLOG, id, "cache", (System.nanoTime() - startTime) / 1000000.0));
                 return (Meal) cache.getObject("Meal" + id);
             }
             Meal meal = mealRepository.findById(id).orElseThrow();
@@ -60,9 +63,8 @@ public class MealDaoImpl implements MealDao {
                     .map(product -> setRealWeightAndCaloriesForProduct(meal.getId(), product))
                     .collect(Collectors.toList()));
             cache.addObject("Meal" + id, new CacheItem(meal));
-            log.info("Get meal (id = " + id + ") from DB. Time elapsed = " +
-                    (System.nanoTime() - startTime) / 1000000.0 + "ms");
-            log.info("Meal (id = " + id + ") was added to cache");
+            log.info(String.format(GETMEALLOG, id, "DB", (System.nanoTime() - startTime) / 1000000.0));
+            log.info(String.format(MEALLOG, id, "added to"));
             return meal;
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -79,8 +81,8 @@ public class MealDaoImpl implements MealDao {
             startTimeForEach = System.nanoTime();
             if (cache.exists("Meal" + id)) {
                 meals.add((Meal) cache.getObject("Meal" + id));
-                log.info("Get meal (id = " + id + ") from cache. Time elapsed = " +
-                        (System.nanoTime() - startTimeForEach) / 1000000.0 + "ms");
+                log.info(String.format(GETMEALLOG, id, "cache",
+                        (System.nanoTime() - startTimeForEach) / 1000000.0));
             } else {
                 idsOfMealsNotFoundInCache.add(id);
             }
@@ -92,9 +94,9 @@ public class MealDaoImpl implements MealDao {
                 meal = setRealWeightAndCaloriesForAllProducts(meal);
                 cache.addObject("Meal" + id, new CacheItem(meal));
                 meals.add(meal);
-                log.info("Get meal (id = " + id + ") from DB. Time elapsed = " +
-                        (System.nanoTime() - startTimeForEach) / 1000000.0 + "ms");
-                log.info("Meal (id = " + id + ") was added to cache");
+                log.info(String.format(GETMEALLOG, id, "DB",
+                        (System.nanoTime() - startTimeForEach) / 1000000.0));
+                log.info(String.format(MEALLOG, id, "added to"));
             }
         }
         log.info("Time elapsed for getting all meals = " +
@@ -159,7 +161,7 @@ public class MealDaoImpl implements MealDao {
         mealIds.stream().forEach(productDao::deleteProductsIfNotUsed);
         for (int id : mealIds) {
             if (cache.exists("Meal" + id)) {
-                log.info("Meal (id = " + id + ") was deleted from cache");
+                log.info(String.format(MEALLOG, id, "deleted from"));
                 cache.removeObject("Meal" + id);
             }
         }
@@ -176,7 +178,7 @@ public class MealDaoImpl implements MealDao {
         mealRepository.deleteAllByDay_Id(dayId);
         entityManager.flush();
         productDao.updateProductsInCache(productIds);
-        return ResponseEntity.ok("Deleted successfully");
+        return ResponseEntity.ok(DELETEDMESSAGE);
     }
 
     @Override
@@ -192,20 +194,20 @@ public class MealDaoImpl implements MealDao {
         Meal meal = mealRepository.findById(mealId).orElseThrow();
 
         if (cache.exists("Meal" + mealId)) {
-            log.info("Meal (id = " + mealId + ") was deleted from cache");
+            log.info(String.format(MEALLOG, mealId, "deleted from"));
             cache.removeObject("Meal" + mealId);
         }
         if (cache.exists("Day" + dayId)) {
             Day day = (Day) cache.getObject("Day" + dayId);
             day.getMeals().remove(meal);
-            log.info("Meal (id = " + mealId + ") was deleted from day (id = " + dayId + ") in cache");
+            log.info(String.format(MEALDAYLOG, mealId, "deleted from", dayId));
         }
         entityManager.flush();
         List<Integer> productIds = productRepository.getProductsIdsByMealId(mealId);
         mealRepository.deleteMealByIdAndDayId(mealId, dayId);
         entityManager.flush();
         productDao.updateProductsInCache(productIds);
-        return ResponseEntity.ok("Deleted successfully");
+        return ResponseEntity.ok(DELETEDMESSAGE);
     }
 
     @Override
@@ -215,17 +217,17 @@ public class MealDaoImpl implements MealDao {
         updatedMeal.setProducts(meal.getProducts());
         mealRepository.save(updatedMeal);
         if (cache.exists("Meal" + id)) {
-            log.info("Meal (id = " + id + ") was updated in cache");
+            log.info(String.format(MEALLOG, id, "updated in"));
             cache.updateObject("Meal" + id, new CacheItem(updatedMeal));
         } else {
-            log.info("Meal (id = " + id + ") was added to cache");
+            log.info(String.format(MEALLOG, id, "added to"));
             cache.addObject("Meal" + id, new CacheItem(updatedMeal));
         }
         if (cache.exists("Day" + meal.getDay().getId())) {
             Day day = (Day) cache.getObject("Day" + meal.getDay().getId());
             day.getMeals().remove(updatedMeal);
             day.getMeals().add(updatedMeal);
-            log.info("Meal (id = " + id + ") was updated in day (id = " + day.getId() + ") in cache");
+            log.info(String.format(MEALDAYLOG, id, "updated in", day.getId()));
         }
         return updatedMeal;
     }
@@ -297,12 +299,11 @@ public class MealDaoImpl implements MealDao {
         if (cache.exists("Day" + meal.getDay().getId())) {
             Day day = (Day) cache.getObject("Day" + meal.getDay().getId());
             day.getMeals().remove(meal);
-            log.info("Meal (id = " + id +
-                    ") was deleted from day (id = " + meal.getDay().getId() + ") in cache");
+            log.info(String.format(MEALDAYLOG, id, "deleted from", meal.getDay().getId()));
         }
         productDao.deleteProductsIfNotUsed(id);
         if (cache.exists("Meal" + id)) {
-            log.info("Meal (id = " + id + ") was deleted from cache");
+            log.info(String.format(MEALLOG, id, "deleted from"));
             cache.removeObject("Meal" + id);
         }
         entityManager.flush();
@@ -310,7 +311,7 @@ public class MealDaoImpl implements MealDao {
         mealRepository.deleteById(id);
         entityManager.flush();
         productDao.updateProductsInCache(productIds);
-        return ResponseEntity.ok("Deleted successfully");
+        return ResponseEntity.ok(DELETEDMESSAGE);
     }
 
     @Override

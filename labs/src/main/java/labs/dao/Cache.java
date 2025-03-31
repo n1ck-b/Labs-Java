@@ -20,11 +20,10 @@ public class Cache {
         } else {
             long oldestAccessTime = System.currentTimeMillis();
             String oldestObjKey = "";
-            for (String objKey : map.keySet()) {
-                CacheItem value = map.get(objKey);
-                if (value.getLastAccessTime() <= oldestAccessTime) {
-                    oldestAccessTime = value.getLastAccessTime();
-                    oldestObjKey = objKey;
+            for (Map.Entry<String, CacheItem> cacheEntry : map.entrySet()) {
+                if (cacheEntry.getValue().getLastAccessTime() <= oldestAccessTime) {
+                    oldestAccessTime = cacheEntry.getValue().getLastAccessTime();
+                    oldestObjKey = cacheEntry.getKey();
                 }
             }
             map.remove(oldestObjKey);

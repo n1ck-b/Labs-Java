@@ -37,6 +37,8 @@ public class DayDaoImpl implements DayDao {
     private final Cache cache;
     private final MealRepository mealRepository;
     private final ProductRepository productRepository;
+    private static final String GETDAYLOG = "Get day (id = %d) from %s. Time elapsed = %fms";
+    private static final String DAYLOG = "Day (id = %d) was %s cache";
 
     @Autowired
     public DayDaoImpl(DayRepository dayRepository,
@@ -55,8 +57,7 @@ public class DayDaoImpl implements DayDao {
         long startTime = System.nanoTime();
         Day day = (Day) cache.getObject("Day" + id);
         if (day != null) {
-            log.info("Get day (id = " + id + ") from cache. Time elapsed = " +
-                    (System.nanoTime() - startTime) / 1000000.0 + "ms");
+            log.info(String.format(GETDAYLOG, id, "cache", (System.nanoTime() - startTime) / 1000000.0));
             return day;
         }
         try {
@@ -65,9 +66,8 @@ public class DayDaoImpl implements DayDao {
             day.setMeals(meals.stream()
                     .map(mealDao::setRealWeightAndCaloriesForAllProducts).collect(Collectors.toList()));
             cache.addObject("Day" + day.getId(), new CacheItem(day));
-            log.info("Get day (id = " + day.getId() + ") from DB. Time elapsed = " +
-                    (System.nanoTime() - startTime) / 1000000.0 + "ms");
-            log.info("Day (id = " + day.getId() + ") was added to cache");
+            log.info(String.format(GETDAYLOG, id, "DB", (System.nanoTime() - startTime) / 1000000.0));
+            log.info(String.format(DAYLOG, day.getId(), "added to"));
             return day;
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -121,8 +121,8 @@ public class DayDaoImpl implements DayDao {
             day = (Day) cache.getObject("Day" + id);
             if (day != null) {
                 days.add(day);
-                log.info("Get day (id = " + id + ") from cache. Time elapsed = " +
-                        (System.nanoTime() - startTimeForEach) / 1000000.0 + "ms");
+                log.info(String.format(GETDAYLOG, id, "cache",
+                        (System.nanoTime() - startTimeForEach) / 1000000.0));
             } else {
                 idsOfDaysNotFoundInCache.add(id);
             }
@@ -137,9 +137,9 @@ public class DayDaoImpl implements DayDao {
                         .map(mealDao::setRealWeightAndCaloriesForAllProducts).collect(Collectors.toList()));
                 cache.addObject("Day" + id, new CacheItem(day));
                 days.add(day);
-                log.info("Get day (id = " + id + ") from DB. Time elapsed = " +
-                        (System.nanoTime() - startTimeForEach) / 1000000.0 + "ms");
-                log.info("Day (id = " + id + ") was added to cache");
+                log.info(String.format(GETDAYLOG, id, "DB",
+                        (System.nanoTime() - startTimeForEach) / 1000000.0));
+                log.info(String.format(DAYLOG, id, "added to"));
             }
         }
         log.info("Time elapsed for getting all days = " + (System.nanoTime() - startTime) / 1000000.0 + "ms");
@@ -159,7 +159,7 @@ public class DayDaoImpl implements DayDao {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         if (cache.exists("Day" + id)) {
-            log.info("Day (id = " + id + ") was deleted from cache");
+            log.info(String.format(DAYLOG, id, "deleted from"));
             cache.removeObject("Day" + id);
         }
         List<Integer> mealIds = mealRepository.findAllMealIdByDayId(id);
@@ -188,10 +188,10 @@ public class DayDaoImpl implements DayDao {
         }
         dayRepository.save(updatedDay);
         if (cache.exists("Day" + id)) {
-            log.info("Day (id = " + id + ") was updated in cache");
+            log.info(String.format(DAYLOG, id, "updated in"));
             cache.updateObject("Day" + id, new CacheItem(updatedDay));
         } else {
-            log.info("Day (id = " + id + ") was added to cache");
+            log.info(String.format(DAYLOG, id, "added to"));
             cache.addObject("Day" + id, new CacheItem(updatedDay));
         }
         return updatedDay;
