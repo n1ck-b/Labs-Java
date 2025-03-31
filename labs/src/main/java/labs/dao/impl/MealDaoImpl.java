@@ -14,9 +14,9 @@ import labs.dao.MealDao;
 import labs.dao.MealRepository;
 import labs.dao.ProductDao;
 import labs.dao.ProductRepository;
+import labs.model.Day;
 import labs.model.Meal;
 import labs.model.Product;
-import labs.model.Day;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -110,11 +110,6 @@ public class MealDaoImpl implements MealDao {
 
     @Override
     public void updateDayInCache(int dayId) {
-//        if (cache.exists("Day" + dayId)) {
-//            log.info("Day (id = " + dayId + ") was updated in cache");
-//            cache.removeObject("Day" + dayId);
-//            cache.addObject("Day" + dayId, new CacheItem(dayRepository.findById(dayId).orElseThrow()));
-//        }
         if (cache.exists("Day" + dayId)) {
             log.info("Day (id = " + dayId + ") was updated in cache");
             cache.removeObject("Day" + dayId);
@@ -144,7 +139,6 @@ public class MealDaoImpl implements MealDao {
                 .forEach(product -> productDao
                         .saveProductWeightToMealProductTable(product.getWeight(),
                                 meal.getId(), product.getId()));
-        //updateDayInCache(dayId);
         if (cache.exists("Day" + dayId)) {
             Day day = (Day) cache.getObject("Day" + dayId);
             day.getMeals().add(meal);
@@ -204,10 +198,8 @@ public class MealDaoImpl implements MealDao {
         if (cache.exists("Day" + dayId)) {
             Day day = (Day) cache.getObject("Day" + dayId);
             day.getMeals().remove(meal);
-            log.info("Meal (id = " + mealId + ") was deleted from day (id =" + dayId + ") in cache");
+            log.info("Meal (id = " + mealId + ") was deleted from day (id = " + dayId + ") in cache");
         }
-//        List<Integer> mealIdList = new ArrayList<>();
-//        mealIdList.add(mealId);
         entityManager.flush();
         List<Integer> productIds = productRepository.getProductsIdsByMealId(mealId);
         mealRepository.deleteMealByIdAndDayId(mealId, dayId);
@@ -233,7 +225,7 @@ public class MealDaoImpl implements MealDao {
             Day day = (Day) cache.getObject("Day" + meal.getDay().getId());
             day.getMeals().remove(updatedMeal);
             day.getMeals().add(updatedMeal);
-            log.info("Meal (id = " + id + ") was updated in day (id = )" + day.getId() + "in cache");
+            log.info("Meal (id = " + id + ") was updated in day (id = " + day.getId() + ") in cache");
         }
         return updatedMeal;
     }
@@ -305,20 +297,15 @@ public class MealDaoImpl implements MealDao {
         if (cache.exists("Day" + meal.getDay().getId())) {
             Day day = (Day) cache.getObject("Day" + meal.getDay().getId());
             day.getMeals().remove(meal);
-            log.info("Meal (id = " + id + ") was deleted from day (id = " + meal.getDay().getId() + ") in cache");
+            log.info("Meal (id = " + id +
+                    ") was deleted from day (id = " + meal.getDay().getId() + ") in cache");
         }
         productDao.deleteProductsIfNotUsed(id);
-//        if (cache.exists("Day" + meal.getDay().getId())) {
-//            cache.updateObject("Day" + meal.getDay().getId(),
-//                    new CacheItem(dayRepository.findById(meal.getDay().getId()).orElseThrow()));
-//        }
         if (cache.exists("Meal" + id)) {
             log.info("Meal (id = " + id + ") was deleted from cache");
             cache.removeObject("Meal" + id);
         }
         entityManager.flush();
-//        List<Integer> mealIdList = new ArrayList<>();
-//        mealIdList.add(id);
         List<Integer> productIds = productRepository.getProductsIdsByMealId(id);
         mealRepository.deleteById(id);
         entityManager.flush();
@@ -328,9 +315,16 @@ public class MealDaoImpl implements MealDao {
 
     @Override
     public List<Meal> getMealsByProductName(String productName) {
-        List<Meal> meals = mealRepository.getMealsByProductName(productName);
-        // List<Integer> mealIds = mealRepository.getMealIdsByProductName(productName);
-        return meals.stream().map(this::setRealWeightAndCaloriesForAllProducts).collect(Collectors.toList());
-        // return getMealsByIds(mealIds);
+        // List<Meal> meals = mealRepository.getMealsByProductName(productName);
+        List<Integer> mealIds = mealRepository.getMealIdsByProductName(productName);
+        //        for (Meal meal : meals) {
+        //            if (!cache.exists("Meal" + meal.getId())) {
+        //                cache.addObject("Meal" + meal.getId(), new CacheItem(meal));
+        //                log.info("Meal (id = " + meal.getId() + ") was added to cache");
+        //            }
+        //        }
+        // return meals.stream().map(this::setRealWeightAndCaloriesForAllProducts)
+        // .collect(Collectors.toList());
+        return getMealsByIds(mealIds);
     }
 }

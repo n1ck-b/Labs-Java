@@ -19,7 +19,6 @@ import labs.dao.ProductRepository;
 import labs.model.Day;
 import labs.model.Meal;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
@@ -169,10 +168,10 @@ public class DayDaoImpl implements DayDao {
             if (cache.exists("Meal" + mealId)) {
                 log.info("Meal (id = " + mealId + ") was deleted from cache");
                 cache.removeObject("Meal" + mealId);
-                productDao.deleteProductsIfNotUsed(mealId);
-                entityManager.flush();
-                productIds.addAll(productRepository.getProductsIdsByMealId(mealId));
             }
+            productDao.deleteProductsIfNotUsed(mealId);
+            entityManager.flush();
+            productIds.addAll(productRepository.getProductsIdsByMealId(mealId));
         }
         dayRepository.deleteById(id);
         entityManager.flush();

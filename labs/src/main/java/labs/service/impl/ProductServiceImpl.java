@@ -52,7 +52,7 @@ public class ProductServiceImpl implements ProductService {
     private static JsonNode getJsonFromExternalApi(String query) throws IOException {
         OkHttpClient client = new OkHttpClient();
         Request requestForExternalApi = new Request.Builder().url("https://api.calorieninjas.com/v1/nutrition?query=" +
-                query).addHeader("X-Api-Key", "3tTSiLRQSqH+KhOWyc1zaA==TkIDRKtbqKj4Aryy").build();
+                query).addHeader("X-Api-Key", "").build();
         long startTime = System.currentTimeMillis();
         Response responseFromExternalApi = client.newCall(requestForExternalApi).execute();
         log.info("Time elapsed for API request = " + (System.currentTimeMillis() - startTime) + "ms");

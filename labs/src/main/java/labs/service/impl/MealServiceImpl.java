@@ -40,8 +40,6 @@ public class MealServiceImpl implements MealService {
     @Override
     public int addMeal(int dayId, MealDto meal) {
         return mealDao.addMeal(dayId, meal.fromDto());
-//        mealDao.updateDayInCache(dayId);
-//        return id;
     }
 
     @Override
