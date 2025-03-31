@@ -52,7 +52,7 @@ public class DayServiceImpl implements DayService {
     @Override
     public ResponseEntity<DayDto> updateDayById(int id, JsonPatch json)
             throws JsonProcessingException {
-        if (json.toString().contains("id") | json.toString().contains("meals")) {
+        if (json.toString().contains("id") || json.toString().contains("meals")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         ObjectMapper objectMapper = new ObjectMapper();

@@ -57,7 +57,7 @@ public class MealServiceImpl implements MealService {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         Meal meal = mealDao.getMealById(id);
-        if (json.toString().contains("day") | json.toString().contains("id") |
+        if (json.toString().contains("day") || json.toString().contains("id") ||
                 json.toString().contains("products")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
