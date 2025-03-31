@@ -38,6 +38,8 @@ public class MealDaoImpl implements MealDao {
     private static final String MEALLOG = "Meal (id = %d) was %s cache";
     private static final String DELETEDMESSAGE = "Deleted successfully";
     private static final String MEALDAYLOG = "Meal (id = %d) was %s day (id = %d) in cache";
+    private static final String ADDEDTOMSG = "added to";
+    private static final String DELETEDFROMMSG = "deleted from";
 
     @Autowired
     public MealDaoImpl(MealRepository mealRepository, ProductDao productDao,
@@ -64,7 +66,7 @@ public class MealDaoImpl implements MealDao {
                     .collect(Collectors.toList()));
             cache.addObject("Meal" + id, new CacheItem(meal));
             log.info(String.format(GETMEALLOG, id, "DB", (System.nanoTime() - startTime) / 1000000.0));
-            log.info(String.format(MEALLOG, id, "added to"));
+            log.info(String.format(MEALLOG, id, ADDEDTOMSG));
             return meal;
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -96,7 +98,7 @@ public class MealDaoImpl implements MealDao {
                 meals.add(meal);
                 log.info(String.format(GETMEALLOG, id, "DB",
                         (System.nanoTime() - startTimeForEach) / 1000000.0));
-                log.info(String.format(MEALLOG, id, "added to"));
+                log.info(String.format(MEALLOG, id, ADDEDTOMSG));
             }
         }
         log.info("Time elapsed for getting all meals = " +
@@ -161,7 +163,7 @@ public class MealDaoImpl implements MealDao {
         mealIds.stream().forEach(productDao::deleteProductsIfNotUsed);
         for (int id : mealIds) {
             if (cache.exists("Meal" + id)) {
-                log.info(String.format(MEALLOG, id, "deleted from"));
+                log.info(String.format(MEALLOG, id, DELETEDFROMMSG));
                 cache.removeObject("Meal" + id);
             }
         }
@@ -194,13 +196,13 @@ public class MealDaoImpl implements MealDao {
         Meal meal = mealRepository.findById(mealId).orElseThrow();
 
         if (cache.exists("Meal" + mealId)) {
-            log.info(String.format(MEALLOG, mealId, "deleted from"));
+            log.info(String.format(MEALLOG, mealId, DELETEDFROMMSG));
             cache.removeObject("Meal" + mealId);
         }
         if (cache.exists("Day" + dayId)) {
             Day day = (Day) cache.getObject("Day" + dayId);
             day.getMeals().remove(meal);
-            log.info(String.format(MEALDAYLOG, mealId, "deleted from", dayId));
+            log.info(String.format(MEALDAYLOG, mealId, DELETEDFROMMSG, dayId));
         }
         entityManager.flush();
         List<Integer> productIds = productRepository.getProductsIdsByMealId(mealId);
@@ -220,7 +222,7 @@ public class MealDaoImpl implements MealDao {
             log.info(String.format(MEALLOG, id, "updated in"));
             cache.updateObject("Meal" + id, new CacheItem(updatedMeal));
         } else {
-            log.info(String.format(MEALLOG, id, "added to"));
+            log.info(String.format(MEALLOG, id, ADDEDTOMSG));
             cache.addObject("Meal" + id, new CacheItem(updatedMeal));
         }
         if (cache.exists("Day" + meal.getDay().getId())) {
@@ -299,11 +301,11 @@ public class MealDaoImpl implements MealDao {
         if (cache.exists("Day" + meal.getDay().getId())) {
             Day day = (Day) cache.getObject("Day" + meal.getDay().getId());
             day.getMeals().remove(meal);
-            log.info(String.format(MEALDAYLOG, id, "deleted from", meal.getDay().getId()));
+            log.info(String.format(MEALDAYLOG, id, DELETEDFROMMSG, meal.getDay().getId()));
         }
         productDao.deleteProductsIfNotUsed(id);
         if (cache.exists("Meal" + id)) {
-            log.info(String.format(MEALLOG, id, "deleted from"));
+            log.info(String.format(MEALLOG, id, DELETEDFROMMSG));
             cache.removeObject("Meal" + id);
         }
         entityManager.flush();
