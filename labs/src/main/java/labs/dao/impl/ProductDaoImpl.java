@@ -67,6 +67,19 @@ public class ProductDaoImpl implements ProductDao {
         }
     }
 
+    public void updatedProductsInMealsInCache(Product product) {
+        List<Integer> mealIds = mealRepository.getMealIdsByProductName(product.getName());
+        Product productCopy;
+        for (int id : mealIds) {
+            productCopy = mealDao.setRealWeightAndCaloriesForProduct(id, product);
+            if (cache.exists("Meal" + id)) {
+                log.info("Meal (id = " + id + ") was updated in cache");
+                ((Meal) cache.getObject("Meal" + id)).getProducts().remove(productCopy);
+                ((Meal) cache.getObject("Meal" + id)).getProducts().add(productCopy);
+            }
+        }
+    }
+
     @Override
     @Transactional
     public int addProductByMealId(int mealId, Product product) {
@@ -102,14 +115,7 @@ public class ProductDaoImpl implements ProductDao {
                     productWeight, mealId, productFromDb.getId());
             entityManager.flush();
             List<Integer> mealIds = mealRepository.getMealIdsByProductName(productFromDb.getName());
-            for (int id : mealIds) {
-                productCopy = mealDao.setRealWeightAndCaloriesForProduct(id, productFromDb);
-                if (cache.exists("Meal" + id)) {
-                    log.info("Meal (id = " + id + ") was updated in cache");
-                    ((Meal) cache.getObject("Meal" + id)).getProducts().remove(productCopy);
-                    ((Meal) cache.getObject("Meal" + id)).getProducts().add(productCopy);
-                }
-            }
+            updatedProductsInMealsInCache(productFromDb);
             for (int id : mealIds) {
                 productCopy = mealDao.setRealWeightAndCaloriesForProduct(id, productFromDb);
                 Day day = dayRepository.findDayByMealId(id);
@@ -136,15 +142,7 @@ public class ProductDaoImpl implements ProductDao {
         productRepository.saveProductWeightToMealProductTable(productWeight, mealId, product.getId());
         entityManager.flush();
         entityManager.detach(product);
-//        List<Integer> mealIds = mealRepository.getMealIdsByProductName(product.getName());
-//        for (int id : mealIds) {
-//            productCopy = mealDao.setRealWeightAndCaloriesForProduct(id, product);
-//            if (cache.exists("Meal" + id)) {
-//                log.info("Meal (id = " + id + ") was updated in cache");
-//                ((Meal) cache.getObject("Meal" + id)).getProducts().remove(productCopy);
-//                ((Meal) cache.getObject("Meal" + id)).getProducts().add(productCopy);
-//            }
-//        }
+        updatedProductsInMealsInCache(product);
         productCopy = mealDao.setRealWeightAndCaloriesForProduct(mealId, product);
         Day day = dayRepository.findDayByMealId(mealId);
         if (cache.exists("Day" + day.getId())) {
