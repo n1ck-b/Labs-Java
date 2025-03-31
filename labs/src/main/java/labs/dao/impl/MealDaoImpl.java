@@ -316,16 +316,7 @@ public class MealDaoImpl implements MealDao {
 
     @Override
     public List<Meal> getMealsByProductName(String productName) {
-        // List<Meal> meals = mealRepository.getMealsByProductName(productName);
         List<Integer> mealIds = mealRepository.getMealIdsByProductName(productName);
-        //        for (Meal meal : meals) {
-        //            if (!cache.exists("Meal" + meal.getId())) {
-        //                cache.addObject("Meal" + meal.getId(), new CacheItem(meal));
-        //                log.info("Meal (id = " + meal.getId() + ") was added to cache");
-        //            }
-        //        }
-        // return meals.stream().map(this::setRealWeightAndCaloriesForAllProducts)
-        // .collect(Collectors.toList());
         return getMealsByIds(mealIds);
     }
 }
