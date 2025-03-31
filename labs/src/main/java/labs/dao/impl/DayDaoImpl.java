@@ -39,6 +39,7 @@ public class DayDaoImpl implements DayDao {
     private final ProductRepository productRepository;
     private static final String GETDAYLOG = "Get day (id = %d) from %s. Time elapsed = %fms";
     private static final String DAYLOG = "Day (id = %d) was %s cache";
+    private static final String ADDEDTOMSG = "added to";
 
     @Autowired
     public DayDaoImpl(DayRepository dayRepository,
@@ -67,7 +68,7 @@ public class DayDaoImpl implements DayDao {
                     .map(mealDao::setRealWeightAndCaloriesForAllProducts).collect(Collectors.toList()));
             cache.addObject("Day" + day.getId(), new CacheItem(day));
             log.info(String.format(GETDAYLOG, id, "DB", (System.nanoTime() - startTime) / 1000000.0));
-            log.info(String.format(DAYLOG, day.getId(), "added to"));
+            log.info(String.format(DAYLOG, day.getId(), ADDEDTOMSG));
             return day;
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -139,7 +140,7 @@ public class DayDaoImpl implements DayDao {
                 days.add(day);
                 log.info(String.format(GETDAYLOG, id, "DB",
                         (System.nanoTime() - startTimeForEach) / 1000000.0));
-                log.info(String.format(DAYLOG, id, "added to"));
+                log.info(String.format(DAYLOG, id, ADDEDTOMSG));
             }
         }
         log.info("Time elapsed for getting all days = " + (System.nanoTime() - startTime) / 1000000.0 + "ms");
@@ -191,7 +192,7 @@ public class DayDaoImpl implements DayDao {
             log.info(String.format(DAYLOG, id, "updated in"));
             cache.updateObject("Day" + id, new CacheItem(updatedDay));
         } else {
-            log.info(String.format(DAYLOG, id, "added to"));
+            log.info(String.format(DAYLOG, id, ADDEDTOMSG));
             cache.addObject("Day" + id, new CacheItem(updatedDay));
         }
         return updatedDay;
