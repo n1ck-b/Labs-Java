@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
-import labs.dao.Cache;
 import labs.dao.CacheItem;
 import labs.dao.DayDao;
 import labs.dao.DayRepository;
@@ -16,6 +15,7 @@ import labs.dao.MealDao;
 import labs.dao.MealRepository;
 import labs.dao.ProductDao;
 import labs.dao.ProductRepository;
+import labs.dao.SessionCache;
 import labs.model.Day;
 import labs.model.Meal;
 import lombok.extern.slf4j.Slf4j;
@@ -34,15 +34,15 @@ public class DayDaoImpl implements DayDao {
     private final DayRepository dayRepository;
     private final MealDao mealDao;
     private final ProductDao productDao;
-    private final Cache cache;
+    private final SessionCache cache;
     private final MealRepository mealRepository;
     private final ProductRepository productRepository;
-    private static final String GETDAYLOG = "Get day (id = %d) from %s. Time elapsed = %fms";
+    private static final String GETDAYLOG = "Get day (id = %d) from %s. Time elapsed = %.4fms";
     private static final String DAYLOG = "Day (id = %d) was %s cache";
 
     @Autowired
     public DayDaoImpl(DayRepository dayRepository,
-                      @Lazy MealDao mealDao, @Lazy ProductDao productDao, Cache cache,
+                      @Lazy MealDao mealDao, @Lazy ProductDao productDao, SessionCache cache,
                       MealRepository mealRepository, ProductRepository productRepository) {
         this.dayRepository = dayRepository;
         this.mealDao = mealDao;

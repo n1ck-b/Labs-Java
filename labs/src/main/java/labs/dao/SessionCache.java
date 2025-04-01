@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class Cache {
+public class SessionCache {
     private Map<String, CacheItem> map;
 
-    public Cache() {
+    public SessionCache() {
         map = new HashMap<>();
     }
 

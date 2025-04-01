@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
-import labs.dao.Cache;
 import labs.dao.CacheItem;
 import labs.dao.DayRepository;
 import labs.dao.MealDao;
 import labs.dao.MealRepository;
 import labs.dao.ProductDao;
 import labs.dao.ProductRepository;
+import labs.dao.SessionCache;
 import labs.model.Day;
 import labs.model.Meal;
 import labs.model.Product;
@@ -32,16 +32,16 @@ public class MealDaoImpl implements MealDao {
     private final MealRepository mealRepository;
     private final DayRepository dayRepository;
     private final ProductDao productDao;
-    private final Cache cache;
+    private final SessionCache cache;
     private final ProductRepository productRepository;
-    private static final String GETMEALLOG = "Get meal (id = %d) from %s. Time elapsed = %fms";
+    private static final String GETMEALLOG = "Get meal (id = %d) from %s. Time elapsed = %.4fms";
     private static final String MEALLOG = "Meal (id = %d) was %s cache";
     private static final String DELETEDMESSAGE = "Deleted successfully";
     private static final String MEALDAYLOG = "Meal (id = %d) was %s day (id = %d) in cache";
 
     @Autowired
     public MealDaoImpl(MealRepository mealRepository, ProductDao productDao,
-                       DayRepository dayRepository, Cache cache, ProductRepository productRepository) {
+                       DayRepository dayRepository, SessionCache cache, ProductRepository productRepository) {
         this.mealRepository = mealRepository;
         this.productDao = productDao;
         this.dayRepository = dayRepository;
