@@ -15,6 +15,7 @@ public interface DayRepository extends JpaRepository<Day, Integer> {
     @Query("SELECT id FROM Day WHERE date = :date")
     List<Integer> findDaysIdsByDate(LocalDate date);
 
-    @Query("SELECT d FROM Day d WHERE d.id = (SELECT day.id FROM Meal WHERE id = :mealId)")
+    @Query(nativeQuery = true,
+            value = "SELECT * FROM days WHERE id = (SELECT day_id FROM meals WHERE id = :mealId)")
     Day findDayByMealId(int mealId);
 }

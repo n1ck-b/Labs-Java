@@ -7,10 +7,10 @@ import lombok.Setter;
 @Getter
 public class CacheItem {
     private Object object;
-    private long lastAccessTime;
+    private String key;
 
-    public CacheItem(Object object) {
+    public CacheItem(Object object, String key) {
         this.object = object;
-        this.lastAccessTime = System.currentTimeMillis();
+        this.key = key;
     }
 }

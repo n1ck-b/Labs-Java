@@ -6,9 +6,8 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
-import labs.dao.CacheItem;
+import labs.aspect.LogExecution;
 import labs.dao.DayDao;
 import labs.dao.DayRepository;
 import labs.dao.MealDao;
@@ -21,13 +20,12 @@ import labs.model.Meal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @Repository
+@LogExecution
 public class DayDaoImpl implements DayDao {
     @PersistenceContext
     EntityManager entityManager;
@@ -37,8 +35,6 @@ public class DayDaoImpl implements DayDao {
     private final SessionCache cache;
     private final MealRepository mealRepository;
     private final ProductRepository productRepository;
-    private static final String GETDAYLOG = "Get day (id = %d) from %s. Time elapsed = %.4fms";
-    private static final String DAYLOG = "Day (id = %d) was %s cache";
 
     @Autowired
     public DayDaoImpl(DayRepository dayRepository,
@@ -57,21 +53,14 @@ public class DayDaoImpl implements DayDao {
         long startTime = System.nanoTime();
         Day day = (Day) cache.getObject("Day" + id);
         if (day != null) {
-            log.info(String.format(GETDAYLOG, id, "cache", (System.nanoTime() - startTime) / 1000000.0));
             return day;
         }
-        try {
-            day = dayRepository.findById(id).orElseThrow();
-            List<Meal> meals = day.getMeals();
-            day.setMeals(meals.stream()
-                    .map(mealDao::setRealWeightAndCaloriesForAllProducts).collect(Collectors.toList()));
-            cache.addObject("Day" + day.getId(), new CacheItem(day));
-            log.info(String.format(GETDAYLOG, id, "DB", (System.nanoTime() - startTime) / 1000000.0));
-            log.info(String.format(DAYLOG, day.getId(), "added to"));
-            return day;
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+        day = dayRepository.findById(id).orElseThrow();
+        List<Meal> meals = day.getMeals();
+        day.setMeals(meals.stream()
+                .map(mealDao::setRealWeightAndCaloriesForAllProducts).collect(Collectors.toList()));
+        cache.addObject("Day" + day.getId(), day);
+        return day;
     }
 
     @Transactional
@@ -111,18 +100,13 @@ public class DayDaoImpl implements DayDao {
     }
 
     public List<Day> getDaysByIds(List<Integer> ids) {
-        long startTime = System.nanoTime();
         List<Day> days = new ArrayList<>();
         List<Integer> idsOfDaysNotFoundInCache = new ArrayList<>();
         Day day;
-        long startTimeForEach;
         for (int id : ids) {
-            startTimeForEach = System.nanoTime();
             day = (Day) cache.getObject("Day" + id);
             if (day != null) {
                 days.add(day);
-                log.info(String.format(GETDAYLOG, id, "cache",
-                        (System.nanoTime() - startTimeForEach) / 1000000.0));
             } else {
                 idsOfDaysNotFoundInCache.add(id);
             }
@@ -130,43 +114,36 @@ public class DayDaoImpl implements DayDao {
         List<Meal> meals;
         if (!idsOfDaysNotFoundInCache.isEmpty()) {
             for (int id : idsOfDaysNotFoundInCache) {
-                startTimeForEach = System.nanoTime();
                 day = dayRepository.findById(id).orElseThrow();
                 meals = day.getMeals();
                 day.setMeals(meals.stream()
                         .map(mealDao::setRealWeightAndCaloriesForAllProducts).collect(Collectors.toList()));
-                cache.addObject("Day" + id, new CacheItem(day));
+                cache.addObject("Day" + id, day);
                 days.add(day);
-                log.info(String.format(GETDAYLOG, id, "DB",
-                        (System.nanoTime() - startTimeForEach) / 1000000.0));
-                log.info(String.format(DAYLOG, id, "added to"));
             }
         }
-        log.info("Time elapsed for getting all days = " + (System.nanoTime() - startTime) / 1000000.0 + "ms");
         return days;
     }
 
     @Override
     public List<Day> getAllDays() {
         List<Integer> dayIds = dayRepository.findAllDaysIds();
+        if (dayIds.isEmpty()) {
+            return new ArrayList<>();
+        }
         return getDaysByIds(dayIds);
     }
 
     @Transactional
     @Override
     public ResponseEntity<String> deleteDayById(int id) {
-        if (!dayRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
         if (cache.exists("Day" + id)) {
-            log.info(String.format(DAYLOG, id, "deleted from"));
             cache.removeObject("Day" + id);
         }
         List<Integer> mealIds = mealRepository.findAllMealIdByDayId(id);
         List<Integer> productIds = new ArrayList<>();
         for (int mealId : mealIds) {
             if (cache.exists("Meal" + mealId)) {
-                log.info("Meal (id = " + mealId + ") was deleted from cache");
                 cache.removeObject("Meal" + mealId);
             }
             productDao.deleteProductsIfNotUsed(mealId);
@@ -175,7 +152,9 @@ public class DayDaoImpl implements DayDao {
         }
         dayRepository.deleteById(id);
         entityManager.flush();
-        productDao.updateProductsInCache(productIds);
+        if (!productIds.isEmpty()) {
+            productDao.updateProductsInCache(productIds);
+        }
         return ResponseEntity.ok("Deleted successfully");
     }
 
@@ -187,13 +166,7 @@ public class DayDaoImpl implements DayDao {
             updatedDay.setMeals(day.getMeals());
         }
         dayRepository.save(updatedDay);
-        if (cache.exists("Day" + id)) {
-            log.info(String.format(DAYLOG, id, "updated in"));
-            cache.updateObject("Day" + id, new CacheItem(updatedDay));
-        } else {
-            log.info(String.format(DAYLOG, id, "added to"));
-            cache.addObject("Day" + id, new CacheItem(updatedDay));
-        }
+        cache.addObject("Day" + id, updatedDay);
         return updatedDay;
     }
 
@@ -201,8 +174,13 @@ public class DayDaoImpl implements DayDao {
     public List<Day> getDayByDate(LocalDate date) {
         List<Integer> dayIds = dayRepository.findDaysIdsByDate(date);
         if (dayIds.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            return new ArrayList<>();
         }
         return getDaysByIds(dayIds);
+    }
+
+    @Override
+    public boolean existsById(int id) {
+        return dayRepository.existsById(id);
     }
 }

@@ -17,4 +17,6 @@ public interface DayDao {
     Day updateDayById(int id, Day updatedDay);
 
     List<Day> getDayByDate(LocalDate date);
+
+    boolean existsById(int id);
 }

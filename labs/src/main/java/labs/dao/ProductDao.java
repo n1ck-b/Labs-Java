@@ -27,5 +27,9 @@ public interface ProductDao {
 
     void saveProductWeightToMealProductTable(float weight, int mealId, int productId);
 
+    void saveProductsWeightToTable(List<Product> products, int mealId);
+
     void updateProductsInCache(List<Integer> mealIds);
+
+    boolean existsById(int id);
 }

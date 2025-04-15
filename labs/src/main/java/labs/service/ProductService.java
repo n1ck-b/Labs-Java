@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface ProductService {
-    ProductDto getProductById(int id) throws IOException;
+    ProductDto getProductById(int id);
 
     List<Product> getProductsByQuery(String query) throws IOException;
 

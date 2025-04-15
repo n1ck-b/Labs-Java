@@ -1,6 +1,6 @@
 package labs.dao;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -8,52 +8,37 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class SessionCache {
-    private Map<String, CacheItem> map;
+    private Map<String, Object> map;
+    private static final int MAX_ENTRIES = 200;
 
     public SessionCache() {
-        map = new HashMap<>();
+        map = new LinkedHashMap<>() {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry eldest) {
+                if (size() > MAX_ENTRIES) {
+                    log.info(eldest.getValue().getClass().getSimpleName() + " with key = '" +
+                            eldest.getKey() + "' was removed from cache");
+                }
+                return size() > MAX_ENTRIES;
+            }
+        };
     }
 
-    public void addObject(String key, CacheItem item) {
-        if (map.size() <= 200) {
-            map.put(key, item);
-        } else {
-            long oldestAccessTime = System.currentTimeMillis();
-            String oldestObjKey = "";
-            for (Map.Entry<String, CacheItem> cacheEntry : map.entrySet()) {
-                if (cacheEntry.getValue().getLastAccessTime() <= oldestAccessTime) {
-                    oldestAccessTime = cacheEntry.getValue().getLastAccessTime();
-                    oldestObjKey = cacheEntry.getKey();
-                }
-            }
-            map.remove(oldestObjKey);
-            map.put(key, item);
-        }
+    public CacheItem addObject(String key, Object item) {
+        map.put(key, item);
+        return new CacheItem(item, key);
     }
 
     public Object getObject(String key) {
-        CacheItem item = map.get(key);
-        if (item == null) {
-            return null;
-        }
-        item.setLastAccessTime(System.currentTimeMillis());
-        return item.getObject();
+        return map.get(key);
     }
 
-    public Object removeObject(String key) {
-        return map.remove(key).getObject();
+    public CacheItem removeObject(String key) {
+        Object object = map.remove(key);
+        return new CacheItem(object, key);
     }
 
     public boolean exists(String key) {
-        CacheItem item = map.get(key);
-        if (item != null) {
-            item.setLastAccessTime(System.currentTimeMillis());
-        }
-        return item != null;
-    }
-
-    public void updateObject(String key, CacheItem updatedItem) {
-        updatedItem.setLastAccessTime(System.currentTimeMillis());
-        map.put(key, updatedItem);
+        return map.get(key) != null;
     }
 }

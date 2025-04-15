@@ -33,4 +33,6 @@ public interface MealDao {
     List<Meal> getMealsByProductName(String productName);
 
     void updateDayInCache(int dayId);
+
+    boolean existsById(int id);
 }
