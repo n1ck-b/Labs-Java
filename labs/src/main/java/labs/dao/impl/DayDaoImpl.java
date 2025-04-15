@@ -50,7 +50,6 @@ public class DayDaoImpl implements DayDao {
 
     @Override
     public Day getDayById(int id) {
-        long startTime = System.nanoTime();
         Day day = (Day) cache.getObject("Day" + id);
         if (day != null) {
             return day;

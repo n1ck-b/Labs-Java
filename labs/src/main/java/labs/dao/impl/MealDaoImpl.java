@@ -160,7 +160,7 @@ public class MealDaoImpl implements MealDao {
         }
         if (cache.exists("Day" + dayId)) {
             Day day = (Day) cache.getObject("Day" + dayId);
-            day.getMeals().remove(meal);;
+            day.getMeals().remove(meal);
         }
         entityManager.flush();
         List<Integer> productIds = productRepository.getProductsIdsByMealId(mealId);

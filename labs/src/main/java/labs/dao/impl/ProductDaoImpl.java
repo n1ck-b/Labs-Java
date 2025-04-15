@@ -50,7 +50,6 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public Product getProductById(int id) {
-        long startTime = System.nanoTime();
         if (cache.exists("Product" + id)) {
             return (Product) cache.getObject("Product" + id);
         }
