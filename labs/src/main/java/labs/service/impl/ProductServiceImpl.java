@@ -1,5 +1,7 @@
 package labs.service.impl;
 
+import static java.lang.System.getenv;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
+import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +29,12 @@ import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Slf4j
 @Service
 @LogExecution
+@Validated
 public class ProductServiceImpl implements ProductService {
     private final ProductDao productDao;
     private final MealDao mealDao;
@@ -62,15 +67,16 @@ public class ProductServiceImpl implements ProductService {
 
     public static JsonNode getJsonFromExternalApi(String query) throws IOException {
         OkHttpClient client = new OkHttpClient();
+        String apiKey = getenv("API_KEY");
         Request requestForExternalApi = new Request.Builder().url("https://api.calorieninjas.com/v1/nutrition?query=" +
-                query).addHeader("X-Api-Key", "").build();
+                query).addHeader("X-Api-Key", apiKey).build();
         Response responseFromExternalApi = client.newCall(requestForExternalApi).execute();
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readTree(responseFromExternalApi.body().string());
     }
 
     @Override
-    public List<Integer> addProductByMealId(int mealId, ProductDto productDto) {
+    public List<Integer> addProductByMealId(int mealId, @Valid ProductDto productDto) {
         if (!mealDao.existsById(mealId)) {
             throw new NotFoundException(String.format(ExceptionMessages.MEAL_NOT_FOUND, mealId));
         }

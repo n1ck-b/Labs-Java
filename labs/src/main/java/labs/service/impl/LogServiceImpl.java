@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import labs.aspect.LogExecution;
 import labs.exception.ExceptionMessages;
@@ -23,8 +24,9 @@ public class LogServiceImpl implements LogService {
     private static final String DIR_PATH = "./logs";
 
     @Override
-    public Resource getLogFileByDate(@PastOrPresent LocalDate date) throws IOException {
-        Path logFilePath = Paths.get(LOG_FILE_PATH);
+    public Resource getLogFileByDate(@PastOrPresent LocalDate date, String pathToLogFile) throws IOException {
+        Path logFilePath;
+        logFilePath = Paths.get(Objects.requireNonNullElse(pathToLogFile, LOG_FILE_PATH));
         List<String> allLines = Files.readAllLines(logFilePath);
         List<String> filteredStrings = allLines
                 .stream()

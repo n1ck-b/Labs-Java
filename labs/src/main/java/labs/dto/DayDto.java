@@ -5,14 +5,19 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import labs.exception.ExceptionMessages;
 import labs.model.Day;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class DayDto {
     @Schema(description = "ID of the day", accessMode = Schema.AccessMode.READ_ONLY)
     @Null(message = ExceptionMessages.ID_VALIDATION_ERROR)
@@ -43,5 +48,17 @@ public class DayDto {
         day.setDate(this.date);
         day.setMeals(this.meals.stream().map(MealDto::fromDto).toList());
         return day;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) return false;
+        DayDto dayDto = (DayDto) object;
+        return id.equals(dayDto.id) && date.isEqual(dayDto.date) && meals.equals(dayDto.meals);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, date, meals);
     }
 }

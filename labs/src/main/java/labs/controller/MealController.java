@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.io.IOException;
 import java.util.List;
@@ -114,7 +113,7 @@ public class MealController {
             @Parameter(description = "Optional path parameter, query to add product/products by. " +
                     "This query should contain name of the product and may contain its weight",
                     example = "120g of rice and 200g of chicken") String query,
-            @RequestBody(required = false) @Valid ProductDto productDto,
+            @RequestBody(required = false) ProductDto productDto,
             @PathVariable @Positive @Parameter(
                     description = "ID of the meal to add the product to") int mealId) throws IOException {
         if (query == null) {

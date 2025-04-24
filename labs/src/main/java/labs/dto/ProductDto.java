@@ -8,14 +8,19 @@ import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import java.util.Objects;
 import labs.exception.ExceptionMessages;
 import labs.model.Meal;
 import labs.model.Product;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProductDto {
     @Schema(description = "ID of the product", accessMode = Schema.AccessMode.READ_ONLY)
     @Null(message = ExceptionMessages.ID_VALIDATION_ERROR)
@@ -86,5 +91,24 @@ public class ProductDto {
         product.setCarbs(this.carbs);
         product.setFats(this.fats);
         return product;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) return false;
+        ProductDto that = (ProductDto) object;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(mealIds, that.mealIds) &&
+                Objects.equals(weight, that.weight) &&
+                Objects.equals(calories, that.calories) &&
+                Objects.equals(proteins, that.proteins) &&
+                Objects.equals(carbs, that.carbs) &&
+                Objects.equals(fats, that.fats);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, mealIds, weight, calories, proteins, carbs, fats);
     }
 }

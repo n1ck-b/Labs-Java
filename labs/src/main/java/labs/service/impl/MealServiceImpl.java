@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +26,11 @@ import labs.service.MealService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Service
 @LogExecution
+@Validated
 public class MealServiceImpl implements MealService {
     private final MealDao mealDao;
     private final DayDao dayDao;
@@ -50,7 +53,7 @@ public class MealServiceImpl implements MealService {
     }
 
     @Override
-    public int addMeal(int dayId, MealDto meal) {
+    public int addMeal(int dayId, @Valid MealDto meal) {
         if (!dayDao.existsById(dayId)) {
             throw new NotFoundException(String.format(ExceptionMessages.DAY_NOT_FOUND, dayId));
         }

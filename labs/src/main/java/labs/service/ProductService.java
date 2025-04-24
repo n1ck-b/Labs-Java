@@ -3,6 +3,7 @@ package labs.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
+import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import labs.dto.ProductDto;
@@ -16,7 +17,7 @@ public interface ProductService {
 
     List<Product> getProductsByQuery(String query) throws IOException;
 
-    List<Integer> addProductByMealId(int mealId, ProductDto productDto);
+    List<Integer> addProductByMealId(int mealId, @Valid ProductDto productDto);
 
     List<Integer> addProductsByQueryAndMealId(int mealId, String query) throws IOException;
 

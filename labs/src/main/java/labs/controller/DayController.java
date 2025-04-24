@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 import labs.aspect.LogExecution;
 import labs.dto.DayDto;
+import labs.dto.ListOfDtoMeals;
 import labs.dto.MealDto;
 import labs.service.DayService;
 import labs.service.MealService;
@@ -63,8 +64,8 @@ public class DayController {
             @ApiResponse(responseCode = "200", description = "Day was successfully created"),
             @ApiResponse(responseCode = "400", description = "Invalid request body")
     })
-    public int addDay(@RequestBody @Valid @Parameter(description = "Day object") DayDto day) {
-        return dayService.addDay(day.fromDto());
+    public int addDay(@RequestBody @Parameter(description = "Day object") DayDto day) {
+        return dayService.addDay(day);
     }
 
     @GetMapping
@@ -132,7 +133,7 @@ public class DayController {
     })
     public int addMeal(@PathVariable @Positive
                        @Parameter(description = "ID of the day to add a meal to") int dayId,
-                       @RequestBody @Valid MealDto mealDto) {
+                       @RequestBody MealDto mealDto) {
         return mealService.addMeal(dayId, mealDto);
     }
 
@@ -154,5 +155,24 @@ public class DayController {
             return mealService.deleteMealsByDayId(dayId);
         }
         return mealService.deleteMealByDayIdAndMealId(dayId, mealId);
+    }
+
+    @Operation(summary = "Add list of meals by day ID",
+            description = "Adds list of meals to specified day")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Meals were successfully added"),
+            @ApiResponse(responseCode = "400", description = "Invalid request body"),
+            @ApiResponse(responseCode = "404", description = "Day with specified ID wasn't found")
+    })
+    @PostMapping("/{dayId}/meals/bulk")
+    public List<MealDto> addListOfMeals(@PathVariable @Positive
+            @Parameter(description = "ID of the day to add list of meals to")
+            int dayId, @Valid @RequestBody ListOfDtoMeals meals) {
+        return meals.getMeals().stream()
+                .map(meal -> mealService.addMeal(dayId, meal))
+                .toList()
+                .stream()
+                .map(mealService::getMealById)
+                .toList();
     }
 }

@@ -3,6 +3,8 @@ package labs.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import labs.dto.MealDto;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 public interface MealService {
     List<MealDto> getMealsByDayId(int dayId);
 
-    int addMeal(int dayId, MealDto meal);
+    int addMeal(int dayId, @Valid MealDto meal);
 
     ResponseEntity<String> deleteMealsByDayId(int dayId);
 
@@ -25,5 +27,5 @@ public interface MealService {
 
     ResponseEntity<String> deleteMealById(int id);
 
-    List<MealDto> getMealsByProductName(String productName);
+    List<MealDto> getMealsByProductName(@NotNull String productName);
 }

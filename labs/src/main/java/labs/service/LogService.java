@@ -5,5 +5,5 @@ import java.time.LocalDate;
 import org.springframework.core.io.Resource;
 
 public interface LogService {
-    Resource getLogFileByDate(LocalDate date) throws IOException;
+    Resource getLogFileByDate(LocalDate date, String pathToLogFile) throws IOException;
 }

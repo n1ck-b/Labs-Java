@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
@@ -20,9 +21,11 @@ import labs.service.DayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Service
 @LogExecution
+@Validated
 public class DayServiceImpl implements DayService {
     private final DayDao dayDao;
 
@@ -41,12 +44,12 @@ public class DayServiceImpl implements DayService {
     }
 
     @Override
-    public int addDay(Day day) {
+    public int addDay(@Valid DayDto day) {
         Day dayFromDb;
         try {
             dayFromDb = getDayByDate(day.getDate()).get(0).fromDto();
         } catch (NotFoundException ex) {
-            return dayDao.addDay(day);
+            return dayDao.addDay(day.fromDto());
         }
         return dayFromDb.getId();
     }

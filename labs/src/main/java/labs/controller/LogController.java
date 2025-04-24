@@ -53,7 +53,7 @@ public class LogController {
         } catch (DateTimeParseException ex) {
             throw new ValidationException("Passed string could not be parsed to date format \"yyyy-mm-dd\"");
         }
-        Resource resource = logService.getLogFileByDate(date);
+        Resource resource = logService.getLogFileByDate(date, null);
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" +
                         resource.getFilename() + "\"").body(resource);
     }
