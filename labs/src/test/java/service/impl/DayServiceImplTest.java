@@ -45,7 +45,7 @@ public class DayServiceImplTest {
     private DayServiceImpl dayService;
 
     @BeforeEach
-    public void setUp() throws IOException {
+    void setUp() throws IOException {
         day = new Day(ID, LocalDate.of(2025, 4, 15), List.of());
         dayDto = new DayDto(ID, LocalDate.of(2025, 4, 15), List.of());
         day2 = new Day(2, LocalDate.of(2024, 6, 4), List.of());
@@ -77,7 +77,7 @@ public class DayServiceImplTest {
     }
 
     @Test
-    public void testGetDayById_Successfully() {
+    void testGetDayById_Successfully() {
         Mockito.when(dayDao.getDayById(ID)).thenReturn(day);
         Mockito.when(dayDao.existsById(ID)).thenReturn(true);
 
@@ -88,7 +88,7 @@ public class DayServiceImplTest {
     }
 
     @Test
-    public void testGetDayById_NotFound() {
+    void testGetDayById_NotFound() {
         Mockito.when(dayDao.existsById(ID)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> dayService.getDayById(ID));
@@ -96,7 +96,7 @@ public class DayServiceImplTest {
     }
 
     @Test
-    public void testAddDay_WhenExists() {
+    void testAddDay_WhenExists() {
         Mockito.when(dayDao.getDayByDate(dayDto.getDate())).thenReturn(List.of(day));
 
         int result = dayService.addDay(dayDto);
@@ -106,7 +106,7 @@ public class DayServiceImplTest {
     }
 
     @Test
-    public void testAddDay_WhenNotExists() {
+    void testAddDay_WhenNotExists() {
         Mockito.when(dayDao.getDayByDate(dayDto.getDate())).thenReturn(List.of());
         Mockito.when(dayDao.addDay(dayDto.fromDto())).thenReturn(ID);
 
@@ -117,7 +117,7 @@ public class DayServiceImplTest {
     }
 
     @Test
-    public void testGetAllDays_WhenExist() {
+    void testGetAllDays_WhenExist() {
         Mockito.when(dayDao.getAllDays()).thenReturn(List.of(day, day2));
 
         List<DayDto> result = dayService.getAllDays();
@@ -126,14 +126,14 @@ public class DayServiceImplTest {
     }
 
     @Test
-    public void testGetAllDays_WhenNotExist() {
+    void testGetAllDays_WhenNotExist() {
         Mockito.when(dayDao.getAllDays()).thenReturn(List.of());
 
         assertThrows(NotFoundException.class, () -> dayService.getAllDays());
     }
 
     @Test
-    public void testDeleteDayById_WhenExists() {
+    void testDeleteDayById_WhenExists() {
         Mockito.when(dayDao.existsById(ID)).thenReturn(true);
         Mockito.when(dayDao.deleteDayById(ID)).thenReturn(responseEntityForDeletion);
 
@@ -143,7 +143,7 @@ public class DayServiceImplTest {
     }
 
     @Test
-    public void testDeleteDayById_WhenNotExists() {
+    void testDeleteDayById_WhenNotExists() {
         Mockito.when(dayDao.existsById(ID)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> dayService.deleteDayById(ID));
@@ -151,7 +151,7 @@ public class DayServiceImplTest {
     }
 
     @Test
-    public void testUpdateDayById_WhenExists() throws IOException, JsonPatchException {
+    void testUpdateDayById_WhenExists() throws IOException, JsonPatchException {
         Mockito.when(dayDao.existsById(ID)).thenReturn(true);
         Mockito.when(dayDao.getDayById(ID)).thenReturn(day);
         Mockito.when(dayDao.updateDayById(ID, updatedDay)).thenReturn(updatedDay);
@@ -163,7 +163,7 @@ public class DayServiceImplTest {
     }
 
     @Test
-    public void testUpdateDayById_WhenNotExists() {
+    void testUpdateDayById_WhenNotExists() {
         Mockito.when(dayDao.existsById(ID)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> dayService.updateDayById(ID, jsonPatch));
@@ -171,7 +171,7 @@ public class DayServiceImplTest {
     }
 
     @Test
-    public void testUpdateDayById_WhenJsonContainsRestrictedFields() {
+    void testUpdateDayById_WhenJsonContainsRestrictedFields() {
         Mockito.when(dayDao.existsById(ID)).thenReturn(true);
 
         assertThrows(ValidationException.class, () -> dayService.updateDayById(ID, jsonPatchWithError));
@@ -179,7 +179,7 @@ public class DayServiceImplTest {
     }
 
     @Test
-    public void testGetDayByDate_WhenExists() {
+    void testGetDayByDate_WhenExists() {
         Mockito.when(dayDao.getDayByDate(dayDto.getDate())).thenReturn(List.of(day));
 
         List<DayDto> result = dayService.getDayByDate(dayDto.getDate());
@@ -188,7 +188,7 @@ public class DayServiceImplTest {
     }
 
     @Test
-    public void testGetDayByDate_WhenNotExists() {
+    void testGetDayByDate_WhenNotExists() {
         Mockito.when(dayDao.getDayByDate(dayDto.getDate())).thenReturn(List.of());
 
         assertThrows(NotFoundException.class, () -> dayService.getDayByDate(dayDto.getDate()));

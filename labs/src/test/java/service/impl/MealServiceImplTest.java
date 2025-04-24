@@ -57,7 +57,7 @@ public class MealServiceImplTest {
     private MealServiceImpl mealService;
 
     @BeforeEach
-    public void setUp() throws IOException {
+    void setUp() throws IOException {
         day = new Day(ID1, LocalDate.of(2025, 4, 15), List.of());
         meal1 = new Meal(ID1, "breakfast", day, List.of());
         meal2 = new Meal(ID2, "lunch", day, List.of());
@@ -90,7 +90,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testGetMealsByDayId_WhenExists() {
+    void testGetMealsByDayId_WhenExists() {
         Mockito.when(mealDao.getMealsByDayId(ID1)).thenReturn(List.of(meal1, meal2));
 
         List<MealDto> result = mealService.getMealsByDayId(ID1);
@@ -100,7 +100,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testGetMealsByDayId_WhenNotExists() {
+    void testGetMealsByDayId_WhenNotExists() {
         Mockito.when(mealDao.getMealsByDayId(ID1)).thenReturn(List.of());
 
         assertThrows(NotFoundException.class, () -> mealService.getMealsByDayId(ID1));
@@ -108,7 +108,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testAddMealByDayId_WhenDayExists() {
+    void testAddMealByDayId_WhenDayExists() {
         Mockito.when(dayDao.existsById(ID1)).thenReturn(true);
         Mockito.when(mealDao.addMeal(ID1, mealDto.fromDto())).thenReturn(ID1);
 
@@ -119,7 +119,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testAddMealByDayId_WhenDayNotExists() {
+    void testAddMealByDayId_WhenDayNotExists() {
         Mockito.when(dayDao.existsById(ID1)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> mealService.addMeal(ID1, mealDto));
@@ -127,7 +127,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testDeleteMealsByDayId_WhenExists() {
+    void testDeleteMealsByDayId_WhenExists() {
         Mockito.when(dayDao.existsById(ID1)).thenReturn(true);
         Mockito.when(mealDao.deleteMealsByDayId(ID1)).thenReturn(responseEntityForDeletion);
 
@@ -138,7 +138,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testDeleteMealsByDayId_WhenNotExists() {
+    void testDeleteMealsByDayId_WhenNotExists() {
         Mockito.when(dayDao.existsById(ID1)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> mealService.deleteMealsByDayId(ID1));
@@ -146,7 +146,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testDeleteMealByDayIdAndMealId_WhenAllExist() {
+    void testDeleteMealByDayIdAndMealId_WhenAllExist() {
         Mockito.when(dayDao.existsById(ID1)).thenReturn(true);
         Mockito.when(mealDao.existsById(ID2)).thenReturn(true);
         Mockito.when(mealDao.deleteMealsByDayIdAndMealId(ID1, ID2)).thenReturn(responseEntityForDeletion);
@@ -158,7 +158,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testDeleteMealByDayIdAndMealId_WhenDayNotExists() {
+    void testDeleteMealByDayIdAndMealId_WhenDayNotExists() {
         Mockito.when(dayDao.existsById(ID1)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> mealService.deleteMealByDayIdAndMealId(ID1, ID2));
@@ -166,7 +166,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testDeleteMealByDayIdAndMealId_WhenMealNotExists() {
+    void testDeleteMealByDayIdAndMealId_WhenMealNotExists() {
         Mockito.when(dayDao.existsById(ID1)).thenReturn(true);
         Mockito.when(mealDao.existsById(ID2)).thenReturn(false);
 
@@ -175,7 +175,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testUpdateMealById_WhenExists() throws JsonPatchException, JsonProcessingException {
+    void testUpdateMealById_WhenExists() throws JsonPatchException, JsonProcessingException {
         Mockito.when(mealDao.existsById(ID1)).thenReturn(true);
         Mockito.when(mealDao.getMealById(ID1)).thenReturn(meal1);
         Mockito.when(mealDao.updateMeal(ID1, updatedMeal)).thenReturn(updatedMeal);
@@ -187,7 +187,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testUpdateMealById_WhenNotExists() {
+    void testUpdateMealById_WhenNotExists() {
         Mockito.when(mealDao.existsById(ID1)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> mealService.updateMealById(jsonPatch, ID1));
@@ -195,7 +195,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testUpdateMealById_WhenJsonContainsRestrictedFields() {
+    void testUpdateMealById_WhenJsonContainsRestrictedFields() {
         Mockito.when(mealDao.existsById(ID1)).thenReturn(true);
         Mockito.when(mealDao.getMealById(ID1)).thenReturn(meal1);
 
@@ -204,7 +204,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testGetAllMeals_WhenExist() {
+    void testGetAllMeals_WhenExist() {
         Mockito.when(mealDao.getAllMeals()).thenReturn(List.of(meal1, meal2));
 
         List<MealDto> result = mealService.getAllMeals();
@@ -214,7 +214,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testGetAllMeals_WhenNotExist() {
+    void testGetAllMeals_WhenNotExist() {
         Mockito.when(mealDao.getAllMeals()).thenReturn(List.of());
 
         assertThrows(NotFoundException.class, () -> mealService.getAllMeals());
@@ -222,7 +222,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testGetMealById_WhenExists() {
+    void testGetMealById_WhenExists() {
         Mockito.when(mealDao.existsById(ID1)).thenReturn(true);
         Mockito.when(mealDao.getMealById(ID1)).thenReturn(meal1);
 
@@ -233,7 +233,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testGetMealById_WhenNotExists() {
+    void testGetMealById_WhenNotExists() {
         Mockito.when(mealDao.existsById(ID1)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> mealService.getMealById(ID1));
@@ -241,7 +241,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testDeleteMealById_WhenExists() {
+    void testDeleteMealById_WhenExists() {
         Mockito.when(mealDao.existsById(ID1)).thenReturn(true);
         Mockito.when(mealDao.deleteMealById(ID1)).thenReturn(responseEntityForDeletion);
 
@@ -252,7 +252,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testDeleteMealById_WhenNotExists() {
+    void testDeleteMealById_WhenNotExists() {
         Mockito.when(mealDao.existsById(ID1)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> mealService.deleteMealById(ID1));
@@ -260,7 +260,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testGetMealsByProductName_WhenExist() {
+    void testGetMealsByProductName_WhenExist() {
         Mockito.when(mealDao.getMealsByProductName(PRODUCT_NAME)).thenReturn(List.of(meal1, meal2));
 
         List<MealDto> result = mealService.getMealsByProductName(PRODUCT_NAME);
@@ -270,7 +270,7 @@ public class MealServiceImplTest {
     }
 
     @Test
-    public void testGetMealsByProductName_WhenNotExist() {
+    void testGetMealsByProductName_WhenNotExist() {
         Mockito.when(mealDao.getMealsByProductName(PRODUCT_NAME)).thenReturn(List.of());
 
         assertThrows(NotFoundException.class, () -> mealService.getMealsByProductName(PRODUCT_NAME));

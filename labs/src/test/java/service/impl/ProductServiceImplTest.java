@@ -52,7 +52,7 @@ public class ProductServiceImplTest {
     private ProductServiceImpl productService;
 
     @BeforeEach
-    public void setUp() throws IOException {
+    void setUp() throws IOException {
         product1 = new Product(ID1, "bread", 100, 261.6f, 8.8f, 50.2f, 3.4f, List.of());
         product2 = new Product(ID2, "rice", 100, 140, 0.9f, 45, 7, List.of());
         productDto = new ProductDto(ID1, "bread", List.of(), 100.0f, 261.6f, 8.8f, 50.2f, 3.4f);
@@ -86,7 +86,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testGetProductById_WhenExists() {
+    void testGetProductById_WhenExists() {
         Mockito.when(productDao.existsById(ID1)).thenReturn(true);
         Mockito.when(productDao.getProductById(ID1)).thenReturn(product1);
 
@@ -97,7 +97,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testGetProductById_WhenNotExists() {
+    void testGetProductById_WhenNotExists() {
         Mockito.when(productDao.existsById(ID1)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> productService.getProductById(ID1));
@@ -105,19 +105,19 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testGetProductByQuery_WhenExists() throws IOException {
+    void testGetProductByQuery_WhenExists() throws IOException {
         List<Product> result = productService.getProductsByQuery(QUERY);
 
         assertEquals(List.of(new Product(0, "bread", 100, 261.6f, 8.8f, 50.2f, 3.4f, List.of())), result);
     }
 
     @Test
-    public void testGetProductByQuery_WhenNotExists() {
+    void testGetProductByQuery_WhenNotExists() {
         assertThrows(NotFoundException.class, () -> productService.getProductsByQuery("null"));
     }
 
     @Test
-    public void testAddProductByMealId_WhenExists() {
+    void testAddProductByMealId_WhenExists() {
         Mockito.when(mealDao.existsById(ID1)).thenReturn(true);
         Mockito.when(productDao.addProductByMealId(ID1, productDto.fromDto())).thenReturn(ID1);
 
@@ -128,7 +128,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testAddProductByMealId_WhenNotExists() {
+    void testAddProductByMealId_WhenNotExists() {
         Mockito.when(mealDao.existsById(ID1)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> productService.addProductByMealId(ID1, productDto));
@@ -136,7 +136,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testAddProductByMealId_WhenProductHasDifferentWeight() {
+    void testAddProductByMealId_WhenProductHasDifferentWeight() {
         Product product = new Product(ID1, "bread", 200, 261.6f, 8.8f, 50.2f, 3.4f, List.of());
         Mockito.when(mealDao.existsById(ID1)).thenReturn(true);
         Mockito.when(productDao.addProductByMealId(ID1, product)).thenReturn(ID1);
@@ -148,14 +148,14 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testSetProductWeight_WhenWeightIsDifferent() {
+    void testSetProductWeight_WhenWeightIsDifferent() {
         Product result = productService.setWeightAndCalories(productWithDifferentWeight);
 
         assertEquals(new Product(ID1, "bread", 200, 261.6f, 8.8f, 50.2f, 3.4f, List.of()), result);
     }
 
     @Test
-    public void testAddProductsByQueryAndMealId_WhenNotExists() throws IOException {
+    void testAddProductsByQueryAndMealId_WhenNotExists() throws IOException {
         Mockito.when(mealDao.existsById(ID1)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> productService.addProductsByQueryAndMealId(ID1, QUERY));
@@ -163,7 +163,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testGetAllProducts_WhenExist() {
+    void testGetAllProducts_WhenExist() {
         Mockito.when(productDao.getAllProducts()).thenReturn(List.of(product1, product2));
 
         List<ProductDto> result = productService.getAllProducts();
@@ -173,7 +173,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testGetAllProducts_WhenNotExist() {
+    void testGetAllProducts_WhenNotExist() {
         Mockito.when(productDao.getAllProducts()).thenReturn(List.of());
 
         assertThrows(NotFoundException.class, () -> productService.getAllProducts());
@@ -181,7 +181,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testDeleteProductsByMealId_WhenExists() {
+    void testDeleteProductsByMealId_WhenExists() {
         Mockito.when(mealDao.existsById(ID1)).thenReturn(true);
         Mockito.when(productDao.deleteProductsByMealId(ID1)).thenReturn(responseEntityForDeletion);
 
@@ -192,7 +192,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testDeleteProductsByMealId_WhenNotExists() {
+    void testDeleteProductsByMealId_WhenNotExists() {
         Mockito.when(mealDao.existsById(ID1)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> productService.deleteProductsByMealId(ID1));
@@ -200,7 +200,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testDeleteProductId_WhenExists() {
+    void testDeleteProductId_WhenExists() {
         Mockito.when(productDao.existsById(ID1)).thenReturn(true);
         Mockito.when(productDao.deleteProductById(ID1)).thenReturn(responseEntityForDeletion);
 
@@ -211,7 +211,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testDeleteProductId_WhenNotExists() {
+    void testDeleteProductId_WhenNotExists() {
         Mockito.when(productDao.existsById(ID1)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> productService.deleteProductById(ID1));
@@ -219,7 +219,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testUpdateProductById_WhenExists() throws JsonPatchException, JsonProcessingException {
+    void testUpdateProductById_WhenExists() throws JsonPatchException, JsonProcessingException {
         Mockito.when(productDao.existsById(ID1)).thenReturn(true);
         Mockito.when(productDao.getProductById(ID1)).thenReturn(product1);
         Mockito.when(productDao.updateProduct(ID1, updatedProduct)).thenReturn(updatedProduct);
@@ -231,7 +231,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testUpdateProductById_WhenNotExists() {
+    void testUpdateProductById_WhenNotExists() {
         Mockito.when(productDao.existsById(ID1)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> productService.updateProductById(ID1, jsonPatch));
@@ -239,7 +239,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testUpdateProductById_WhenJsonContainsRestrictedField() {
+    void testUpdateProductById_WhenJsonContainsRestrictedField() {
         Mockito.when(productDao.existsById(ID1)).thenReturn(true);
         Mockito.when(productDao.getProductById(ID1)).thenReturn(product1);
 
@@ -249,7 +249,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testGetAllProductsByMealId_WhenExists() {
+    void testGetAllProductsByMealId_WhenExists() {
         Mockito.when(mealDao.existsById(ID1)).thenReturn(true);
         Mockito.when(productDao.getAllProductsByMealId(ID1)).thenReturn(List.of(product1, product2));
 
@@ -260,7 +260,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testGetAllProductsByMealId_WhenMealNotExists() {
+    void testGetAllProductsByMealId_WhenMealNotExists() {
         Mockito.when(mealDao.existsById(ID1)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> productService.getAllProductsByMealId(ID1));
@@ -268,7 +268,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    public void testGetAllProductsByMealId_WhenProductsNotExist() {
+    void testGetAllProductsByMealId_WhenProductsNotExist() {
         Mockito.when(mealDao.existsById(ID1)).thenReturn(true);
         Mockito.when(productDao.getAllProductsByMealId(ID1)).thenReturn(List.of());
 
