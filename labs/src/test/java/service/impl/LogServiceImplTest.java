@@ -19,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 
 @ExtendWith(MockitoExtension.class)
-public class LogServiceImplTest {
+class LogServiceImplTest {
     private Path currentDir;
     private LogService logService;
     private LocalDate date;

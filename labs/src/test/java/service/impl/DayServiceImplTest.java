@@ -28,7 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
-public class DayServiceImplTest {
+class DayServiceImplTest {
     private static final int ID = 1;
     private Day day;
     private Day day2;
