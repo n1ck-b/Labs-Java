@@ -16,6 +16,9 @@ public class ExceptionMessages {
     public static final String PRODUCTS_NOT_FOUND = "Products not found";
     public static final String LOGS_NOT_FOUND = "Logs for date = %s were not found";
     public static final String MEALS_NOT_FOUND_BY_DAY = "Meals were not found for day with id = %d";
+    public static final String TASK_ID_NOT_FOUND = "Task with ID = %d was not found";
+    public static final String COUNTER_NOT_FOUND = "Counter for URL '%s' wasn't found";
+    public static final String COUNTERS_NOT_FOUND = "Counters weren't found for any URL";
 
     private ExceptionMessages() {
         throw new UnsupportedOperationException("Class cannot be instantiated");

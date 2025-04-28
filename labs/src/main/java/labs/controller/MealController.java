@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
 import java.io.IOException;
 import java.util.List;
+import labs.aspect.CountVisits;
 import labs.aspect.LogExecution;
 import labs.dto.MealDto;
 import labs.dto.ProductDto;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@CountVisits
 @Validated
 @RestController
 @LogExecution

@@ -97,4 +97,11 @@ public class GlobalExceptionHandler {
     public ExceptionResponse validationExceptionHandler(ValidationException ex, WebRequest request) {
         return new ExceptionResponse(ex.getMessage(), request.getDescription(false));
     }
+
+    @ResponseBody
+    @ExceptionHandler(FileProcessingException.class)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ExceptionResponse fileProcessingExceptionHandler(FileProcessingException ex, WebRequest request) {
+        return new ExceptionResponse(ex.getMessage(), request.getDescription(false));
+    }
 }

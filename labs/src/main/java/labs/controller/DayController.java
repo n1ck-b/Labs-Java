@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.List;
+import labs.aspect.CountVisits;
 import labs.aspect.LogExecution;
 import labs.dto.DayDto;
 import labs.dto.ListOfDtoMeals;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@CountVisits
 @Validated
 @RestController
 @LogExecution

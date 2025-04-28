@@ -1,6 +1,8 @@
 package labs.aspect;
 
+import jakarta.servlet.http.HttpServletRequest;
 import labs.dao.CacheItem;
+import labs.service.VisitCounterService;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -8,14 +10,25 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
 public class AspectComponent {
     private final Logger logger = LoggerFactory.getLogger(AspectComponent.class);
+
+    private final HttpServletRequest httpRequest;
+    private final VisitCounterService visitCounterService;
+
+    @Autowired
+    public AspectComponent(HttpServletRequest request, VisitCounterService visitCounterService) {
+        this.httpRequest = request;
+        this.visitCounterService = visitCounterService;
+    }
 
     @Before("@within(LogExecution)")
     public void logStartOfExecution(JoinPoint joinPoint) {
@@ -83,5 +96,16 @@ public class AspectComponent {
         Object object = joinPoint.proceed();
         logger.info("Time elapsed for API request = {}ms", System.currentTimeMillis() - startTime);
         return object;
+    }
+
+    @Pointcut("@annotation(CountVisits)")
+    public void countVisitForEachMethod() { }
+
+    @Pointcut("@within(CountVisits)")
+    public void countVisitForClass() { }
+
+    @Before("countVisitForEachMethod() || countVisitForClass()")
+    public void countVisitsForUrl(JoinPoint joinPoint) {
+        visitCounterService.incrementCounter(httpRequest.getRequestURI());
     }
 }
