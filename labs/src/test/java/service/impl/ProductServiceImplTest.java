@@ -155,7 +155,7 @@ public class ProductServiceImplTest {
     }
 
     @Test
-    void testAddProductsByQueryAndMealId_WhenNotExists() throws IOException {
+    void testAddProductsByQueryAndMealId_WhenNotExists() {
         Mockito.when(mealDao.existsById(ID1)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> productService.addProductsByQueryAndMealId(ID1, QUERY));

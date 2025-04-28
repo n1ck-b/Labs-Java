@@ -115,6 +115,7 @@ public class LogServiceImpl implements LogService {
         try {
             return processingFiles.get(taskId).get();
         } catch (ExecutionException | InterruptedException ex) {
+            Thread.currentThread().interrupt();
             throw new RuntimeException(ex);
         }
     }
