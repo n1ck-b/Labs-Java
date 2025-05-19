@@ -44,14 +44,14 @@ public class DayServiceImpl implements DayService {
     }
 
     @Override
-    public int addDay(@Valid DayDto day) {
+    public DayDto addDay(@Valid DayDto day) {
         Day dayFromDb;
         try {
             dayFromDb = getDayByDate(day.getDate()).get(0).fromDto();
         } catch (NotFoundException ex) {
-            return dayDao.addDay(day.fromDto());
+            return DayDto.toDto(dayDao.addDay(day.fromDto()));
         }
-        return dayFromDb.getId();
+        return DayDto.toDto(dayFromDb);
     }
 
     @Override

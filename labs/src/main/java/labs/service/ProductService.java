@@ -17,9 +17,9 @@ public interface ProductService {
 
     List<Product> getProductsByQuery(String query) throws IOException;
 
-    List<Integer> addProductByMealId(int mealId, @Valid ProductDto productDto);
+    List<ProductDto> addProductByMealId(int mealId, @Valid ProductDto productDto);
 
-    List<Integer> addProductsByQueryAndMealId(int mealId, String query) throws IOException;
+    List<ProductDto> addProductsByQueryAndMealId(int mealId, String query) throws IOException;
 
     List<ProductDto> getAllProductsByMealId(int mealId);
 
@@ -30,5 +30,10 @@ public interface ProductService {
     ResponseEntity<String> deleteProductById(int id);
 
     ResponseEntity<ProductDto> updateProductById(int id, JsonPatch json)
+            throws JsonPatchException, JsonProcessingException;
+
+    ResponseEntity<String> deleteProductByMealIdAndProductId(int mealId, int productId);
+
+    ResponseEntity<ProductDto> updateProductByMealIdAndProductId(int mealId, int productId, JsonPatch json)
             throws JsonPatchException, JsonProcessingException;
 }

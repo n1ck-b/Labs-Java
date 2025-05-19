@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 public interface DayService {
     DayDto getDayById(int id);
 
-    int addDay(@Valid DayDto day);
+    DayDto addDay(@Valid DayDto day);
 
     List<DayDto> getAllDays();
 

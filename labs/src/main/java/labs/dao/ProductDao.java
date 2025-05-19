@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 public interface ProductDao {
     Product getProductById(int id);
 
-    int addProductByMealId(int mealId, Product product);
+    Product addProductByMealId(int mealId, Product product);
 
     List<Product> getAllProductsByMealId(int mealId);
 
@@ -32,4 +32,6 @@ public interface ProductDao {
     void updateProductsInCache(List<Integer> mealIds);
 
     boolean existsById(int id);
+
+    ResponseEntity<String> deleteProductByMealIdAndProductId(int mealId, int productId);
 }

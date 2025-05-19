@@ -20,6 +20,7 @@ import labs.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 @LogExecution
 @RequestMapping("/meals")
 @Tag(name = "Meal controller", description = "API for CRUD operations with meals")
+@CrossOrigin(origins = "http://localhost:3000")
 public class MealController {
     private final MealService mealService;
     private final ProductService productService;
@@ -111,7 +113,7 @@ public class MealController {
             @ApiResponse(responseCode = "400", description = "Invalid request body"),
             @ApiResponse(responseCode = "404", description = "Meal with specified ID wasn't found")
     })
-    public List<Integer> addProductByMealId(@RequestParam(name = "q", required = false)
+    public List<ProductDto> addProductByMealId(@RequestParam(name = "q", required = false)
             @Parameter(description = "Optional path parameter, query to add product/products by. " +
                     "This query should contain name of the product and may contain its weight",
                     example = "120g of rice and 200g of chicken") String query,
@@ -148,5 +150,18 @@ public class MealController {
     public ResponseEntity<String> deleteProductsByMealId(@PathVariable @Positive
             @Parameter(description = "ID of the meal, from which products should be removed") int mealId) {
         return productService.deleteProductsByMealId(mealId);
+    }
+
+    @DeleteMapping("/{mealId}/products/{productId}")
+    public ResponseEntity<String> deleteProductByMealIdAndProductId(@PathVariable @Positive int mealId,
+            @PathVariable int productId) {
+        return productService.deleteProductByMealIdAndProductId(mealId, productId);
+    }
+
+    @PatchMapping("/{mealId}/products/{productId}")
+    public ResponseEntity<ProductDto> updateProductByMealIdAndProductId(@PathVariable @Positive int mealId,
+            @PathVariable int productId, @RequestBody JsonPatch json) throws JsonPatchException,
+            JsonProcessingException {
+        return productService.updateProductByMealIdAndProductId(mealId, productId, json);
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 public interface DayDao {
     Day getDayById(int id);
 
-    int addDay(Day day);
+    Day addDay(Day day);
 
     List<Day> getAllDays();
 

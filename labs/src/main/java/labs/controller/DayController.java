@@ -22,6 +22,7 @@ import labs.service.MealService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -38,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 @LogExecution
 @RequestMapping("/days")
 @Tag(name = "Day controller", description = "API for CRUD operations with days")
+@CrossOrigin(origins = "http://localhost:3000")
 public class DayController {
     private final DayService dayService;
     private final MealService mealService;
@@ -66,7 +68,7 @@ public class DayController {
             @ApiResponse(responseCode = "200", description = "Day was successfully created"),
             @ApiResponse(responseCode = "400", description = "Invalid request body")
     })
-    public int addDay(@RequestBody @Parameter(description = "Day object") DayDto day) {
+    public DayDto addDay(@RequestBody @Parameter(description = "Day object") DayDto day) {
         return dayService.addDay(day);
     }
 

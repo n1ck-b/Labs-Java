@@ -64,7 +64,7 @@ public class DayDaoImpl implements DayDao {
 
     @Transactional
     @Override
-    public int addDay(Day day) {
+    public Day addDay(Day day) {
         if (!day.getMeals().isEmpty()) {
             Day dayCopy = day;
             day.getMeals().stream().forEach(meal -> meal.setDay(dayCopy));
@@ -77,7 +77,7 @@ public class DayDaoImpl implements DayDao {
                                             meal.getId(), product.getId())));
         }
         dayRepository.save(day);
-        return day.getId();
+        return day;
     }
 
     public Day setWeightsForAllProductsByDay(Day day) {

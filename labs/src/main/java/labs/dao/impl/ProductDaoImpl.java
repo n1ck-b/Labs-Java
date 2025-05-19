@@ -72,7 +72,7 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     @Transactional
-    public int addProductByMealId(int mealId, Product product) {
+    public Product addProductByMealId(int mealId, Product product) {
         entityManager.flush();
         Meal mealById;
         Product productCopy;
@@ -96,7 +96,7 @@ public class ProductDaoImpl implements ProductDao {
                 mealsOfProductFromDb.add(mealById);
                 productFromDb.setMeals(mealsOfProductFromDb);
             } else {
-                return productFromDb.getId();
+                return productFromDb;
             }
             productRepository.saveProductToMealProductTable(mealId, productFromDb.getId(), productWeight);
             productRepository.saveProductWeightToMealProductTable(
@@ -119,7 +119,7 @@ public class ProductDaoImpl implements ProductDao {
                     mealFromDayInCache.getProducts().add(productCopy);
                 }
             }
-            return productFromDb.getId();
+            return productFromDb;
         }
         List<Meal> meals = new ArrayList<>();
         meals.add(mealById);
@@ -142,7 +142,7 @@ public class ProductDaoImpl implements ProductDao {
             }
             mealFromDayInCache.getProducts().add(productCopy);
         }
-        return product.getId();
+        return product;
     }
 
     public List<Product> getProductsByIds(List<Integer> ids, int mealId, boolean withRealWeight) {
@@ -233,11 +233,8 @@ public class ProductDaoImpl implements ProductDao {
                         .removeIf(mealFromList -> mealFromList.getId() == mealId));
             }
             Day day = dayRepository.findDayByMealId(id);
-            Meal meal = mealDao.getMealById(id);
             if (cache.exists("Day" + day.getId())) {
-                Day dayFromCache = (Day) cache.getObject("Day" + day.getId());
-                dayFromCache.getMeals().remove(meal);
-                dayFromCache.getMeals().add(meal);
+                cache.removeObject("Day" + day.getId());
             }
         }
     }
@@ -246,6 +243,13 @@ public class ProductDaoImpl implements ProductDao {
     public void deleteProductIfNotUsedOrDeleteFromMeal(int mealId, int productId) {
         if (deleteProductByIdIfNotUsed(productId) == 0) {
             final List<Integer> mealIds = mealRepository.findMealIdsByProductId(productId);
+            List<Meal> meals = mealIds
+                    .stream()
+                    .map(id -> mealRepository.findById(id).orElseThrow())
+                    .collect(Collectors.toList());
+            for (Meal meal : meals) {
+                mealDao.setRealWeightAndCaloriesForAllProducts(meal);
+            }
             productRepository.deleteProductFromMealProductTable(mealId, productId);
             entityManager.flush();
             if (cache.exists("Product" + productId)) {
@@ -256,7 +260,24 @@ public class ProductDaoImpl implements ProductDao {
                 Meal meal = (Meal) cache.getObject("Meal" + mealId);
                 meal.getProducts().removeIf(product -> product.getId() == productId);
             }
+            int dayId = mealRepository.findById(mealId).orElseThrow().getDay().getId();
+            if (cache.exists("Day" + dayId)) {
+                Day day = (Day) cache.getObject("Day" + dayId);
+                day.getMeals().stream().forEach(meal -> {
+                    if (meal.getId() == mealId) {
+                        meal.getProducts().removeIf(product -> product.getId() == productId);
+                    }
+                });
+            }
             updateMealAndDaysInCache(mealIds, mealId);
+            for (Meal meal : meals) {
+                if (meal.getId() != mealId) {
+                    saveProductsWeightToTable(meal.getProducts(), meal.getId());
+                }
+                if (meal.getId() == mealId && !meal.getProducts().isEmpty()) {
+                    saveProductsWeightToTable(meal.getProducts(), meal.getId());
+                }
+            }
         }
     }
 
@@ -284,27 +305,16 @@ public class ProductDaoImpl implements ProductDao {
     @Override
     @Transactional
     public Product updateProduct(int id, Product updatedProduct) {
-        updatedProduct.setMeals(getProductById(id).getMeals());
+        List<Meal> meals = getProductById(id).getMeals();
+        updatedProduct.setMeals(meals);
         productRepository.save(updatedProduct);
         entityManager.flush();
         cache.addObject("Product" + id, updatedProduct);
         List<Integer> mealIds = mealRepository.findMealIdsByProductId(id);
         for (int mealId : mealIds) {
-            if (cache.exists("Meal" + mealId)) {
-                Meal mealFromCache = (Meal) cache.getObject("Meal" + mealId);
-                if (mealFromCache.getProducts().removeIf(product -> product.getId() == id)) {
-                    mealFromCache.getProducts()
-                            .add(mealDao.setRealWeightAndCaloriesForProduct(mealId, updatedProduct));
-                }
-            }
             Day day = dayRepository.findDayByMealId(mealId);
             if (cache.exists("Day" + day.getId())) {
-                Day dayFromCache = (Day) cache.getObject("Day" + day.getId());
-                for (Meal mealFromDay : dayFromCache.getMeals()) {
-                    if (mealFromDay.getProducts().removeIf(product -> product.getId() == id)) {
-                        mealFromDay.getProducts().add(updatedProduct);
-                    }
-                }
+                cache.removeObject("Day" + day.getId());
             }
         }
         return updatedProduct;
@@ -343,5 +353,12 @@ public class ProductDaoImpl implements ProductDao {
     @Override
     public boolean existsById(int id) {
         return productRepository.existsById(id);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<String> deleteProductByMealIdAndProductId(int mealId, int productId) {
+        deleteProductIfNotUsedOrDeleteFromMeal(mealId, productId);
+        return ResponseEntity.ok("Deleted successfully");
     }
 }

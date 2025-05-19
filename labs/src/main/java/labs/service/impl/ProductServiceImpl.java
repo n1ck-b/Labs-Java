@@ -20,6 +20,7 @@ import labs.dto.ProductDto;
 import labs.exception.ExceptionMessages;
 import labs.exception.NotFoundException;
 import labs.exception.ValidationException;
+import labs.model.Meal;
 import labs.model.Product;
 import labs.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
@@ -76,19 +77,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Integer> addProductByMealId(int mealId, @Valid ProductDto productDto) {
+    public List<ProductDto> addProductByMealId(int mealId, @Valid ProductDto productDto) {
         if (!mealDao.existsById(mealId)) {
             throw new NotFoundException(String.format(ExceptionMessages.MEAL_NOT_FOUND, mealId));
         }
-        List<Integer> ids = new ArrayList<>();
+        List<ProductDto> products = new ArrayList<>();
         if (productDto.getWeight() != 100) {
             productDto.setCalories((productDto.getCalories() * 100) / productDto.getWeight());
             productDto.setProteins((productDto.getProteins() * 100) / productDto.getWeight());
             productDto.setCarbs((productDto.getCarbs() * 100) / productDto.getWeight());
             productDto.setFats((productDto.getFats() * 100) / productDto.getWeight());
         }
-        ids.add(productDao.addProductByMealId(mealId, productDto.fromDto()));
-        return ids;
+        products.add(ProductDto.toDto(productDao.addProductByMealId(mealId, productDto.fromDto())));
+        return products;
     }
 
     public Product setWeightAndCalories(Product product) {
@@ -102,14 +103,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Integer> addProductsByQueryAndMealId(int mealId, String query) throws IOException {
+    public List<ProductDto> addProductsByQueryAndMealId(int mealId, String query) throws IOException {
         if (!mealDao.existsById(mealId)) {
             throw new NotFoundException(String.format(ExceptionMessages.MEAL_NOT_FOUND, mealId));
         }
         List<Product> products = getProductsByQuery(query);
         List<Product> updatedProducts = products.stream().map(this::setWeightAndCalories).toList();
         return updatedProducts.stream()
-                .map(product -> productDao.addProductByMealId(mealId, product)).toList();
+                .map(product -> ProductDto.toDto(productDao.addProductByMealId(mealId, product))).toList();
     }
 
     @Override
@@ -170,5 +171,62 @@ public class ProductServiceImpl implements ProductService {
         productDto = objectMapper.treeToValue(node, ProductDto.class);
         product = productDto.fromDto();
         return ResponseEntity.ok(ProductDto.toDto(productDao.updateProduct(id, product)));
+    }
+
+    @Override
+    public ResponseEntity<String> deleteProductByMealIdAndProductId(int mealId, int productId) {
+        if (!mealDao.existsById(mealId)) {
+            throw new NotFoundException(String.format(ExceptionMessages.MEAL_NOT_FOUND, mealId));
+        }
+        if (!productDao.existsById(productId)) {
+            throw new NotFoundException(String.format(ExceptionMessages.PRODUCT_NOT_FOUND, productId));
+        }
+        return productDao.deleteProductByMealIdAndProductId(mealId, productId);
+    }
+
+    @Override
+    public ResponseEntity<ProductDto> updateProductByMealIdAndProductId(int mealId,
+            int productId, JsonPatch json) throws JsonPatchException, JsonProcessingException {
+        if (!productDao.existsById(productId)) {
+            throw new NotFoundException(String.format(ExceptionMessages.PRODUCT_NOT_FOUND, productId));
+        }
+        if (!mealDao.existsById(mealId)) {
+            throw new NotFoundException(String.format(ExceptionMessages.MEAL_NOT_FOUND, mealId));
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        Product product = productDao.getProductById(productId);
+        List<Meal> meals = product.getMeals();
+        for (Meal meal : meals) {
+            mealDao.setRealWeightAndCaloriesForAllProducts(meal);
+        }
+        ProductDto productDto = ProductDto.toDto(product);
+        if (json.toString().contains("id") || json.toString().contains("meals")) {
+            throw new ValidationException(String.format(ExceptionMessages.PATCH_VALIDATION_EXCEPTION,
+                    "'id', 'meals'"));
+        }
+        JsonNode node;
+        node = json.apply(objectMapper.convertValue(productDto, JsonNode.class));
+        productDto = objectMapper.treeToValue(node, ProductDto.class);
+        product = productDto.fromDto();
+        productDao.saveProductWeightToMealProductTable(product.getWeight(), mealId, productId);
+        product = setWeightAndCalories(product);
+        for (Meal meal : meals) {
+            for (Product productFromMeal : meal.getProducts()) {
+                if (productFromMeal.getId() == productId) {
+                    productFromMeal.setWeight(product.getWeight());
+                    productFromMeal.setCalories(product.getCalories());
+                    productFromMeal.setCarbs(product.getCarbs());
+                    productFromMeal.setProteins(product.getProteins());
+                    productFromMeal.setFats(product.getFats());
+                }
+            }
+        }
+        product.setWeight(100);
+        productDto = ProductDto.toDto(productDao.updateProduct(productId, product));
+        for (Meal meal : meals) {
+            productDao.saveProductsWeightToTable(meal.getProducts(), meal.getId());
+        }
+        return ResponseEntity.ok(productDto);
     }
 }
